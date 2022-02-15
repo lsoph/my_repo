@@ -50,6 +50,13 @@ jobs:
           echo '::set-output name=package_version::$(poetry version -s)'
           echo Current package version is $(poetry version -s)
 
+      - name: Checkout branch
+        run: |
+          git config --global user.name lsoph
+          git config --global user.email sofia.lobenko@exactpro.com
+          git pull
+          git checkout origin/${{ steps.refs.outputs.head_ref }}
+
       - name: Update version
         id: update_version
         env:
@@ -72,11 +79,6 @@ jobs:
 
       - name: Update changes in GitHub repository
         run: |
-          git config --global user.name lsoph
-          git config --global user.email sofia.lobenko@exactpro.com
-          git pull
-          git branch
-          git checkout origin/${{ steps.refs.outputs.head_ref }}
           git add .
           git commit -m '[TH2-0] Auto commit. Package version updated'
           git push
