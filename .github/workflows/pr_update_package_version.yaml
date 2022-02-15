@@ -46,7 +46,6 @@ jobs:
         id: pack_ver
         run: |
           echo '::set-output name=package_version::$(poetry version -s)'
-          echo '::set-output name=is_updated::true'
 
       - name: Update version
         id: update_version
@@ -56,9 +55,8 @@ jobs:
           "update major") poetry version major;;
           "update minor") poetry version minor;;
           "update patch") poetry version patch;;
-          *) steps.pack_ver.outputs.is_updated=false;;
+          *) echo Update was not requested && exit 0;;
           esac
 
       - name: Create Comment
-        if: ${{ steps.update_version.outputs.is_updated }}
         run: echo "Package version raised from $steps.pack_ver.outputs.package_version to $(poetry version -s) successfully."
