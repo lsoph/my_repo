@@ -29,7 +29,7 @@ jobs:
               user=${{ github.event.comment.user.login }}
               echo Either ${user} is not part of the th2-net organization
               echo or ${user} has its Organization Visibility set to Private at
-              echo https://github.com/orgs/kata-containers/people?query=${user}
+              echo https://github.com/orgs/th2-net/people?query=${user}
               echo
               echo Ensure you change your Organization Visibility to Public and
               echo trigger the test again.
