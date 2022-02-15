@@ -20,6 +20,8 @@ jobs:
           organization: th2
           username: ${{ github.event.issue.user.login }}
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Is member?
+        run: echo steps.is_organization_member.outputs.result
 
   package_version_update:
     name: Package version update
@@ -27,6 +29,8 @@ jobs:
     if: ${{ needs.organization_member_check.outputs.is_member == true }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
 
