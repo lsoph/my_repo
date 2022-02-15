@@ -51,7 +51,7 @@ jobs:
       - name: Update version
         id: update_version
         run: |
-          event_body=${{ github.event.comment.body }}
+          event_body=$github.event.comment.body
           echo Event body: $event_body
           shopt -s nocasematch
           case $event_body in
