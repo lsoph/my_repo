@@ -74,6 +74,7 @@ jobs:
         run: |
           git config --global user.name lsoph
           git config --global user.email sofia.lobenko@exactpro.com
+          git pull
           git branch
           git checkout origin/${{ steps.refs.outputs.head_ref }}
           git add .
