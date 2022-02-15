@@ -66,10 +66,11 @@ jobs:
 
       - name: Update changes in GitHub repository
         run: |
+          current_brunch=${{ github.head_ref }}
           git config --global user.name lsoph
           git config --global user.email sofia.lobenko@exactpro.com
-          echo ${{ github.head_ref }}
-          git checkout ${{ github.head_ref }}
+          echo $current_brunch
+          git checkout $current_brunch
           git add .
           git commit -m '[TH2-0] Auto commit. Package version updated'
           git push
