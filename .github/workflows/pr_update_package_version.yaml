@@ -64,16 +64,13 @@ jobs:
           *) echo Update was not requested && exit 0;;
           esac
 
-      - name: stage changed files
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: git add .
-      - name: commit changed files
+      - name: Update changes in GitHub repository
         run: |
-          git remote set-url --push origin https://$steps.is_member.outputs.user_login:$GITHUB_TOKEN@github.com/lsoph/my_repo
-          git commit -m "Auto updating package version"
-      - name: push code
-        run: git push
+          git config --global user.name lsoph
+          git config --global user.email sofia.lobenko@exactpro.com
+          git add -A
+          git commit -m '[TH2-0] Auto commit. Package version updated'
+          git push
 
       - name: Create Comment
         run: echo Package version raised from $steps.pack_ver.outputs.package_version to $(poetry version -s) successfully.
