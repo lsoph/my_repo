@@ -64,17 +64,12 @@ jobs:
           *) echo Update was not requested && exit 0;;
           esac
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
       - name: Update changes in GitHub repository
         run: |
           git config --global user.name lsoph
           git config --global user.email sofia.lobenko@exactpro.com
-          echo Source branch: ${{ steps.extract_branch.outputs.branch }}
-          git checkout ${{ steps.extract_branch.outputs.branch }}
+          echo Source branch: $GITHUB_HEAD_REF
+          git checkout $GITHUB_HEAD_REF
           git add .
           git commit -m '[TH2-0] Auto commit. Package version updated'
           git push
