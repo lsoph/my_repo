@@ -69,6 +69,8 @@ jobs:
           git config --global user.name lsoph
           git config --global user.email sofia.lobenko@exactpro.com
           echo Source branch: $GITHUB_HEAD_REF
+          echo Workflow run trigger brunch: $GITHUB_REF_NAME
+          echo Target branch: $GITHUB_BASE_REF
           git checkout $GITHUB_HEAD_REF
           git add .
           git commit -m '[TH2-0] Auto commit. Package version updated'
