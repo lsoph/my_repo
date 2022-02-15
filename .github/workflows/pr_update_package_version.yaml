@@ -51,6 +51,7 @@ jobs:
       - name: Update version
         id: update_version
         run: |
+          echo Event body: $github.event.comment.body
           shopt -s nocasematch
           case $github.event.comment.body in
           "update major") poetry version major && New package version is $(poetry version -s);;
