@@ -24,8 +24,21 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Is member?
         run: |
-          echo ${{ steps.is_organization_member.outputs.result }}
-          echo ${{ github.event.issue.user.login }}
+          result=${{ steps.is_organization_member.outputs.result }}
+          if [ $result == false ]; then
+              user=${{ github.event.comment.user.login }}
+              echo Either ${user} is not part of the th2-net organization
+              echo or ${user} has its Organization Visibility set to Private at
+              echo https://github.com/orgs/kata-containers/people?query=${user}
+              echo
+              echo Ensure you change your Organization Visibility to Public and
+              echo trigger the test again.
+              exit 1
+          fi
+          if [ $result == true ]; then
+              user=${{ github.event.comment.user.login }}
+              echo ${user} is part of the th2-net organization
+          fi
 
   package_version_update:
     name: Package version update
