@@ -62,5 +62,12 @@ jobs:
           *) echo Update was not requested && exit 0;;
           esac
 
+      - name: stage changed files
+        run: git add .
+      - name: commit changed files
+        run: git commit -m "Auto updating package version"
+      - name: push code
+        run: git push
+
       - name: Create Comment
         run: echo Package version raised from $steps.pack_ver.outputs.package_version to $(poetry version -s) successfully.
