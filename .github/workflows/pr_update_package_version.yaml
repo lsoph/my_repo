@@ -20,6 +20,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Is member?
+        id: is_member
         run: |
           result=${{ steps.is_organization_member.outputs.result }}
           if [ $result == false ]; then
@@ -34,6 +35,7 @@ jobs:
           fi
           if [ $result == true ]; then
               user=${{ github.event.comment.user.login }}
+              echo '::set-output name=user_login::$user'
               echo ${user} is part of the th2-net organization
           fi
 
@@ -70,7 +72,7 @@ jobs:
         run: git commit -m "Auto updating package version"
       - name: push code
         run: |
-          git remote set-url --push origin https://${user}:$GITHUB_TOKEN@github.com/lsoph/my_repo
+          git remote set-url --push origin https://$steps.is_member.outputs.user_login:$GITHUB_TOKEN@github.com/lsoph/my_repo
           git push
 
       - name: Create Comment
