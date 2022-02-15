@@ -64,17 +64,22 @@ jobs:
           *) echo Update was not requested && exit 0;;
           esac
 
+      - name: resolve pr refs
+        id: refs
+        uses: eficode/resolve-pr-refs@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Update changes in GitHub repository
         run: |
           git config --global user.name lsoph
           git config --global user.email sofia.lobenko@exactpro.com
-          echo Source branch: $GITHUB_HEAD_REF
-          echo Workflow run trigger brunch: $GITHUB_REF_NAME
-          echo Target branch: $GITHUB_BASE_REF
+          echo Head ref: ${{ steps.refs.outputs.head_ref }}
+          echo Base ref: ${{ steps.refs.outputs.base_ref }}
           git checkout $GITHUB_HEAD_REF
-          git add .
-          git commit -m '[TH2-0] Auto commit. Package version updated'
-          git push
+#          git add .
+#          git commit -m '[TH2-0] Auto commit. Package version updated'
+#          git push
 
       - name: Create Comment
         run: echo Package version raised from $steps.pack_ver.outputs.package_version to $(poetry version -s) successfully.
