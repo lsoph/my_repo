@@ -74,12 +74,10 @@ jobs:
         run: |
           git config --global user.name lsoph
           git config --global user.email sofia.lobenko@exactpro.com
-          echo Head ref: ${{ steps.refs.outputs.head_ref }}
-          echo Base ref: ${{ steps.refs.outputs.base_ref }}
-          git checkout $GITHUB_HEAD_REF
-#          git add .
-#          git commit -m '[TH2-0] Auto commit. Package version updated'
-#          git push
+          git checkout ${{ steps.refs.outputs.head_ref }}
+          git add .
+          git commit -m '[TH2-0] Auto commit. Package version updated'
+          git push
 
       - name: Create Comment
         run: echo Package version raised from $steps.pack_ver.outputs.package_version to $(poetry version -s) successfully.
