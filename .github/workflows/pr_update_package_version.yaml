@@ -68,7 +68,8 @@ jobs:
         run: |
           git config --global user.name lsoph
           git config --global user.email sofia.lobenko@exactpro.com
-          git add -A
+          git checkout ${{ github.head_ref }}
+          git add .
           git commit -m '[TH2-0] Auto commit. Package version updated'
           git push
 
