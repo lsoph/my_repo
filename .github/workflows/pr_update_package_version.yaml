@@ -51,9 +51,10 @@ jobs:
       - name: Update version
         id: update_version
         run: |
-          echo Event body: ${{ github.event.comment.body }}
+          event_body=${{ steps.is_organization_member.outputs.result }}
+          echo Event body: $event_body
           shopt -s nocasematch
-          case ${{ github.event.comment.body }} in
+          case $event_body in
           "update major") poetry version major && New package version is $(poetry version -s);;
           "update minor") poetry version minor && New package version is $(poetry version -s);;
           "update patch") poetry version patch && New package version is $(poetry version -s);;
