@@ -19,7 +19,7 @@ jobs:
         id: is_organization_member
         uses: jamessingleton/is-organization-member@main
         with:
-          organization: th2
+          organization: th2-net
           username: ${{ github.event.issue.user.login }}
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Is member?
