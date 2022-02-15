@@ -5,16 +5,12 @@ on:
     types: [created]
 
 jobs:
-  organization_member_check:
+  package_version_update:
     # This job only runs for pull request comments
-    name: Organisation member check
+    name: Package version update
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
-    outputs:
-      is_member: ${{ steps.is_organization_member.outputs.result }}
     steps:
-      - uses: actions/checkout@v2
-
       - name: Check if organization member
         id: is_organization_member
         uses: jamessingleton/is-organization-member@main
@@ -22,6 +18,7 @@ jobs:
           organization: th2-net
           username: ${{ github.event.issue.user.login }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Is member?
         run: |
           result=${{ steps.is_organization_member.outputs.result }}
@@ -40,12 +37,6 @@ jobs:
               echo ${user} is part of the th2-net organization
           fi
 
-  package_version_update:
-    name: Package version update
-    needs: organization_member_check
-    if: ${{ needs.organization_member_check.outputs.is_member == true }}
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/checkout@v2
 
       - name: Install Poetry
@@ -56,6 +47,7 @@ jobs:
         run: |
           echo '::set-output name=package_version::$(poetry version -s)'
           echo '::set-output name=is_updated::true'
+
       - name: Update version
         id: update_version
         run: |
