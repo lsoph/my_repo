@@ -46,17 +46,18 @@ jobs:
         id: pack_ver
         run: |
           echo '::set-output name=package_version::$(poetry version -s)'
+          echo Current package version is $(poetry version -s)
 
       - name: Update version
         id: update_version
         run: |
           shopt -s nocasematch
           case $github.event.comment.body in
-          "update major") poetry version major;;
-          "update minor") poetry version minor;;
-          "update patch") poetry version patch;;
+          "update major") poetry version major && New package version is $(poetry version -s);;
+          "update minor") poetry version minor && New package version is $(poetry version -s);;
+          "update patch") poetry version patch && New package version is $(poetry version -s);;
           *) echo Update was not requested && exit 0;;
           esac
 
       - name: Create Comment
-        run: echo "Package version raised from $steps.pack_ver.outputs.package_version to $(poetry version -s) successfully."
+        run: echo Package version raised from $steps.pack_ver.outputs.package_version to $(poetry version -s) successfully.
