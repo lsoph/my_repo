@@ -55,6 +55,7 @@ jobs:
           git config --global user.name lsoph
           git config --global user.email sofia.lobenko@exactpro.com
           git pull
+          echo Head ref: ${{ steps.refs.outputs.head_ref }}
           git checkout ${{ steps.refs.outputs.head_ref }}
 
       - name: Update version
