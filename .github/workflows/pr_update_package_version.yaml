@@ -53,7 +53,7 @@ jobs:
         run: |
           echo Event body: ${{ github.event.comment.body }}
           shopt -s nocasematch
-          case $github.event.comment.body in
+          case ${{ github.event.comment.body }} in
           "update major") poetry version major && New package version is $(poetry version -s);;
           "update minor") poetry version minor && New package version is $(poetry version -s);;
           "update patch") poetry version patch && New package version is $(poetry version -s);;
