@@ -90,9 +90,9 @@ jobs:
       - name: Create comment body
         id: comment_body
         run: |
-          if ${{ needs.is_update_needed.outputs.result==true }}: then
+          if ${{ needs.is_update_needed.outputs.result==true }}; then
               echo '::set-output name=body::Update was requested'
-          if ${{ needs.is_update_needed.outputs.result==false }}: then
+          if ${{ needs.is_update_needed.outputs.result==false }}; then
               echo '::set-output name=body::Wrong brunch'
       - uses: actions/github-script@v5
         with:
