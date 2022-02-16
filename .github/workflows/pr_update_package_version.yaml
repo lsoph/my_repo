@@ -21,8 +21,8 @@ jobs:
     name: Is package version update needed
     needs: resolve_pr_refs
     if: |
-      contains(github.event.comment.body, 'update major') &&
-      contains(github.event.comment.body, 'update minor') &&
+      contains(github.event.comment.body, 'update major') ||
+      contains(github.event.comment.body, 'update minor') ||
       contains(github.event.comment.body, 'update patch')
     runs-on: ubuntu-latest
     steps:
