@@ -22,13 +22,13 @@ jobs:
     needs: resolve_pr_refs
     if: |
       ${{ needs.resolve_pr_refs.outputs.target_branch == 'main' || 'master' }} &&
-      "${github.event.comment.body,, == 'update'
+      "${github.event.comment.body,,}" == 'update'
     runs-on: ubuntu-latest
     outputs:
       is_member: ${{ steps.is_organization_member.outputs.result }}
     steps:
       - name: some output
-        run: echo "${github.event.comment.body,,}
+        run: echo "${github.event.comment.body,,}"
 
 #  is_organization_member:
 #    name: Check whether user is th2 member
