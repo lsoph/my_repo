@@ -106,7 +106,7 @@ jobs:
               https://github.com/orgs/th2-net/people?query=${user}.'
 
           fi
-          echo '::set-output name=body::$body'
+          echo '::set-output name=body::${body}'
 
       - uses: actions/github-script@v5
         with:
