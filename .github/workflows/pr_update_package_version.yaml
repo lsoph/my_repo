@@ -22,7 +22,7 @@ jobs:
     needs: resolve_pr_refs
     if: |
       ${{ needs.resolve_pr_refs.outputs.target_branch == 'main' || 'master' &&
-      [[ github.event.comment.body == update* ]] }}
+      contains(github.event.comment.body, 'update') }}
     runs-on: ubuntu-latest
     outputs:
       is_member: ${{ steps.is_organization_member.outputs.result }}
@@ -30,7 +30,7 @@ jobs:
       - name: some output
         run: |
           if  ${{ needs.resolve_pr_refs.outputs.target_branch == 'main' || 'master' }} &&
-          [[ ${{ github.event.comment.body }} == update* ]] ;
+          contains(github.event.comment.body, 'update') ;
           then
               echo yes1
           fi
