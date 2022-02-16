@@ -57,19 +57,18 @@ jobs:
         run: |
           result=${{ steps.membership_check.outputs.result }}
           if [ $result==false ]; then
-              user=${{ github.event.comment.user.login }}
-              echo Either ${user} is not part of the th2-net organization
-              echo or ${user} has its Organization Visibility set to Private at
-              echo https://github.com/orgs/th2-net/people?query=${user}
-              echo
-              echo Ensure you change your Organization Visibility to Public and
-              echo trigger the test again.
-              exit 1
-          fi
-          if [ $result == true ]; then
-              user=${{ github.event.comment.user.login }}
-              echo '::set-output name=user_login::$user'
-              echo ${user} is part of the th2-net organization
+            user=${{ github.event.comment.user.login }}
+            echo Either ${user} is not part of the th2-net organization
+            echo or ${user} has its Organization Visibility set to Private at
+            echo https://github.com/orgs/th2-net/people?query=${user}
+            echo
+            echo Ensure you change your Organization Visibility to Public and
+            echo trigger the test again.
+            exit 1
+          elif [ $result == true ]; then
+            user=${{ github.event.comment.user.login }}
+            echo '::set-output name=user_login::$user'
+            echo ${user} is part of the th2-net organization
           fi
 
 #  update_package_version:
@@ -84,17 +83,25 @@ jobs:
 
   comment_reply:
     name: Reply to a user's comment
-    needs: is_update_needed
+    needs: [is_update_needed, is_organization_member]
     runs-on: ubuntu-latest
     steps:
       - name: Create comment body
         id: comment_body
         run: |
-          if ${{ needs.is_update_needed.outputs.result==true }}; then
-              echo '::set-output name=body::Update was requested'
-          fi
-          if ${{ needs.is_update_needed.outputs.result==false }}; then
-              echo '::set-output name=body::Wrong brunch'
+          if ${{ needs.is_update_needed.outputs.result == true &&
+              needs.is_organization_member.outputs.is_member == true}}; then
+            echo '::set-output name=body::Update was requested'
+
+          elif ${{ needs.is_update_needed.outputs.result == false }}; then
+            echo '::set-output name=body::You can update the version only if the target branch is <master> or <main>'
+
+          elif ${{ needs.is_organization_member.outputs.is_member == false }}; then
+            user=${{ github.event.comment.user.login }}
+            echo '::set-output name=body::You can update the version only if you are th2 member.
+              If you are member, check if your Organization Visibility set to Public at
+              echo https://github.com/orgs/th2-net/people?query=${user}'
+
           fi
       - uses: actions/github-script@v5
         with:
