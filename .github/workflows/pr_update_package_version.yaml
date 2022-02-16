@@ -21,8 +21,8 @@ jobs:
     name: Check whether package version update needed
     needs: resolve_pr_refs
     if: |
-      ${{ needs.resolve_pr_refs.outputs.target_branch == 'main' || 'master' }} &&
-      [[ ${{ github.event.comment.body }} == update* ]]
+      ${{ needs.resolve_pr_refs.outputs.target_branch == 'main' || 'master' &&
+      [[ ${{ github.event.comment.body }} == update* ]] }}
     runs-on: ubuntu-latest
     outputs:
       is_member: ${{ steps.is_organization_member.outputs.result }}
