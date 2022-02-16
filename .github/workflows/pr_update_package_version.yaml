@@ -43,6 +43,7 @@ jobs:
             echo Target branch should be master or main.
           fi
 
+          echo Is update needed: $result
           echo '::set-output name=result::$result'
 
   is_organization_member:
@@ -123,5 +124,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ${{ steps.comment_body.outputs.body }}
+              body: steps.comment_body.outputs.body
             })
