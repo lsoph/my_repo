@@ -38,6 +38,9 @@ jobs:
           if ( needs.resolve_pr_refs.outputs.target_branch=='master' ||
               needs.resolve_pr_refs.outputs.target_branch=='main' ); then
             result=true
+            echo Package version will be updated.
+          else
+            echo Target branch should be master or main.
           fi
 
           echo '::set-output name=result::$result'
@@ -93,6 +96,7 @@ jobs:
         id: comment_body
         run: |
           body='Some comment'
+          echo Is update needed: ${{ needs.is_update_needed.outputs.result }}
 
           if ${{ needs.is_update_needed.outputs.result == true &&
               needs.is_organization_member.outputs.is_member == true}}; then
@@ -106,8 +110,8 @@ jobs:
             body='You can update the version only if you are th2 member.
               If you are member, check if your Organization Visibility set to Public at
               https://github.com/orgs/th2-net/people?query=${user}.'
-
           fi
+
           echo Comment body: $body
           echo '::set-output name=body::$body'
 
