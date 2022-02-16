@@ -113,10 +113,9 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            body=${{ steps.comment_body.outputs.body }}
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '$body'
+              body: ${{ steps.comment_body.outputs.body }}
             })
