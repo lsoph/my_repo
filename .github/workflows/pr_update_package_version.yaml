@@ -30,22 +30,22 @@ jobs:
       - name: some output
         run: echo "${github.event.comment.body,,}
 
-  is_organization_member:
-    name: Check whether user is th2 member
-    runs-on: ubuntu-latest
+#  is_organization_member:
+#    name: Check whether user is th2 member
+#    runs-on: ubuntu-latest
 #    steps:
 
-  update_package_version:
-    name: Update package version
-    runs-on: ubuntu-latest
+#  update_package_version:
+#    name: Update package version
+#    runs-on: ubuntu-latest
 #    steps:
 
-  push_on_github:
-    name: Commit and push on github
-    runs-on: ubuntu-latest
+#  push_on_github:
+#    name: Commit and push on github
+#    runs-on: ubuntu-latest
 #    steps:
 
-  comment_reply:
-    name: Reply to a user's comment
-    runs-on: ubuntu-latest
+#  comment_reply:
+#    name: Reply to a user's comment
+#    runs-on: ubuntu-latest
 #    steps:
