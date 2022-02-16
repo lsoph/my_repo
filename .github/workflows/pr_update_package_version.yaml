@@ -21,16 +21,23 @@ jobs:
     name: Is package version update needed
     needs: resolve_pr_refs
     if: |
-      ( needs.resolve_pr_refs.outputs.target_branch=='master' ||
-      needs.resolve_pr_refs.outputs.target_branch=='main' ) &&
-      contains(github.event.comment.body, 'update')
+      contains(github.event.comment.body, 'update major') &&
+      contains(github.event.comment.body, 'update minor') &&
+      contains(github.event.comment.body, 'update patch')
     runs-on: ubuntu-latest
     steps:
       - name: Version update requested
         run: |
-          echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
-          echo Is main: ${{ needs.resolve_pr_refs.outputs.target_branch == 'main'}}
           echo Version update requested
+          echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
+
+          result=false
+          if ( needs.resolve_pr_refs.outputs.target_branch=='master' ||
+              needs.resolve_pr_refs.outputs.target_branch=='main' ); then
+            result=true
+          fi
+
+          echo '::set-output name=result::$result'
 
   is_organization_member:
     name: TH2 membership check
@@ -49,7 +56,7 @@ jobs:
       - name: Is member?
         run: |
           result=${{ steps.is_organization_member.outputs.result }}
-          if [ $result == false ]; then
+          if [ $result==false ]; then
               user=${{ github.event.comment.user.login }}
               echo Either ${user} is not part of the th2-net organization
               echo or ${user} has its Organization Visibility set to Private at
@@ -75,7 +82,25 @@ jobs:
 #    runs-on: ubuntu-latest
 #    steps:
 
-#  comment_reply:
-#    name: Reply to a user's comment
-#    runs-on: ubuntu-latest
-#    steps:
+  comment_reply:
+    name: Reply to a user's comment
+    needs: is_update_needed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create comment body
+        id: comment_body
+        run: |
+          if ${{ needs.is_update_needed.outputs.result==true }}: then
+              echo '::set-output name=body::Update was requested'
+          if ${{ needs.is_update_needed.outputs.result==false }}: then
+              echo '::set-output name=body::Wrong brunch'
+      - uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: ${{ steps.comment_body.outputs.body }}
+            })
