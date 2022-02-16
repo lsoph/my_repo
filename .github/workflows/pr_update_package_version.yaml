@@ -56,7 +56,7 @@ jobs:
       - name: Is member?
         run: |
           result=${{ steps.membership_check.outputs.result }}
-          if [ $result==false ]; then
+          if [ $result == false ]; then
             user=${{ github.event.comment.user.login }}
             echo Either ${user} is not part of the th2-net organization
             echo or ${user} has its Organization Visibility set to Private at
