@@ -25,8 +25,11 @@ jobs:
       contains(github.event.comment.body, 'update minor') ||
       contains(github.event.comment.body, 'update patch')
     runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.is_needed.outputs.result }}
     steps:
       - name: Version update requested
+        id: is_needed
         run: |
           echo Version update requested
           echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
@@ -91,18 +94,20 @@ jobs:
         run: |
           if ${{ needs.is_update_needed.outputs.result == true &&
               needs.is_organization_member.outputs.is_member == true}}; then
-            echo '::set-output name=body::Update was requested'
+            body='Update was requested.'
 
           elif ${{ needs.is_update_needed.outputs.result == false }}; then
-            echo '::set-output name=body::"You can update the version only if the target branch is \<master\> or \<main\>"'
+            body='You can update the version only if the target branch is master or main.'
 
           elif ${{ needs.is_organization_member.outputs.is_member == false }}; then
             user=${{ github.event.comment.user.login }}
-            echo '::set-output name=body::You can update the version only if you are th2 member.
+            body='You can update the version only if you are th2 member.
               If you are member, check if your Organization Visibility set to Public at
-              echo https://github.com/orgs/th2-net/people?query=${user}'
+              https://github.com/orgs/th2-net/people?query=${user}.'
 
           fi
+          echo '::set-output name=body::$body'
+
       - uses: actions/github-script@v5
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
