@@ -21,14 +21,15 @@ jobs:
     name: Is package version update needed
     needs: resolve_pr_refs
     if: |
-      ${{ needs.resolve_pr_refs.outputs.target_branch == 'master' || 'main' &&
-      contains(github.event.comment.body, 'update') }}
+      ( needs.resolve_pr_refs.outputs.target_branch=='master' ||
+      needs.resolve_pr_refs.outputs.target_branch=='main' ) &&
+      contains(github.event.comment.body, 'update')
     runs-on: ubuntu-latest
     steps:
       - name: Version update requested
         run: |
           echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
-          echo Is main: ${{ needs.resolve_pr_refs.outputs.target_branch == 'master' || 'main'}}
+          echo Is main: ${{ needs.resolve_pr_refs.outputs.target_branch == 'main'}}
           echo Version update requested
 
   is_organization_member:
