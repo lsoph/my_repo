@@ -18,18 +18,20 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   is_update_needed:
-    name: Check whether package version update needed
+    name: Is package version update needed
     needs: resolve_pr_refs
     if: |
-      ${{ needs.resolve_pr_refs.outputs.target_branch == 'main' || 'master' &&
+      ${{ needs.resolve_pr_refs.outputs.target_branch == 'master' || 'main' &&
       contains(github.event.comment.body, 'update') }}
     runs-on: ubuntu-latest
     steps:
       - name: Version update requested
-        run: echo Version update requested
+        run: |
+          echo Target branch: $needs.resolve_pr_refs.outputs.target_branch
+          echo Version update requested
 
   is_organization_member:
-    name: Check whether user is th2 member
+    name: TH2 membership check
     needs: is_update_needed
     runs-on: ubuntu-latest
     outputs:
