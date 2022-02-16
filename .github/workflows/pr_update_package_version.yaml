@@ -94,7 +94,7 @@ jobs:
             echo '::set-output name=body::Update was requested'
 
           elif ${{ needs.is_update_needed.outputs.result == false }}; then
-            echo '::set-output name=body::You can update the version only if the target branch is <master> or <main>'
+            echo '::set-output name=body::"You can update the version only if the target branch is master> or <main>"'
 
           elif ${{ needs.is_organization_member.outputs.is_member == false }}; then
             user=${{ github.event.comment.user.login }}
