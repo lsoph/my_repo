@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Version update requested
         run: |
-          echo Target branch: $needs.resolve_pr_refs.outputs.target_branch
+          echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
           echo Version update requested
 
   is_organization_member:
