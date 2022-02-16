@@ -92,6 +92,8 @@ jobs:
       - name: Create comment body
         id: comment_body
         run: |
+          body=''
+
           if ${{ needs.is_update_needed.outputs.result == true &&
               needs.is_organization_member.outputs.is_member == true}}; then
             body='Update was requested.'
@@ -105,10 +107,8 @@ jobs:
               If you are member, check if your Organization Visibility set to Public at
               https://github.com/orgs/th2-net/people?query=${user}.'
 
-          else
-            body='Uncknown event happened'
-
           fi
+          echo Comment body: $body
           echo '::set-output name=body::$body'
 
       - uses: actions/github-script@v5
