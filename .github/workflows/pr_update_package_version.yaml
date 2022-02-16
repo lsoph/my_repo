@@ -62,6 +62,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Is member?
         run: |
+          echo Is update needed: ${{ needs.is_update_needed.outputs.result }}
           result=${{ steps.membership_check.outputs.result }}
           if [ $result == false ]; then
             user=${{ github.event.comment.user.login }}
