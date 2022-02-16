@@ -28,6 +28,7 @@ jobs:
       - name: Version update requested
         run: |
           echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
+          echo Is main: ${{ needs.resolve_pr_refs.outputs.target_branch == 'master' || 'main'}}
           echo Version update requested
 
   is_organization_member:
