@@ -24,16 +24,20 @@ jobs:
       ${{ needs.resolve_pr_refs.outputs.target_branch == 'main' || 'master' &&
       contains(github.event.comment.body, 'update') }}
     runs-on: ubuntu-latest
-    outputs:
-      is_member: ${{ steps.is_organization_member.outputs.result }}
     steps:
       - name: some output
         run: |
-          if  ${{ needs.resolve_pr_refs.outputs.target_branch == 'main' || 'master' }} &&
-          contains(github.event.comment.body, 'update') ;
-          then
-              echo yes1
-          fi
+          echo ok
+
+  some_job:
+    name: Some job
+    needs: resolve_pr_refs
+    if: ${{ needs.resolve_pr_refs.outputs.target_branch == 'br'}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: some output
+        run: |
+          echo ok
 
 #  is_organization_member:
 #    name: Check whether user is th2 member
