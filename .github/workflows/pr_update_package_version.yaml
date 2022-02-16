@@ -92,7 +92,7 @@ jobs:
       - name: Create comment body
         id: comment_body
         run: |
-          body=''
+          body='Some comment'
 
           if ${{ needs.is_update_needed.outputs.result == true &&
               needs.is_organization_member.outputs.is_member == true}}; then
