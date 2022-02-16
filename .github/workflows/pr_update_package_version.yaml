@@ -35,8 +35,8 @@ jobs:
           echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
 
           result=false
-          if ${{ needs.resolve_pr_refs.outputs.target_branch }} == 'master' ||
-              needs.resolve_pr_refs.outputs.target_branch }} == 'main' }}; then
+          if ${{ needs.resolve_pr_refs.outputs.target_branch == 'master' ||
+              needs.resolve_pr_refs.outputs.target_branch == 'main' }}; then
             result=true
             echo Package version will be updated.
           else
