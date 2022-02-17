@@ -64,10 +64,28 @@ jobs:
             echo ${user} is part of the th2-net organization
           fi
 
-#  update_package_version:
-#    name: Update package version
-#    runs-on: ubuntu-latest
-#    steps:
+  update_package_version:
+    name: Update package version
+    needs: [resolve_pr_refs, is_organization_member]
+    if: ${{ needs.is_organization_member.outputs.is_member==true }}
+    runs-on: ubuntu-latest
+#    outputs:
+#      old_version_source: ${{  }}
+#      new_version_source: ${{  }}
+#      version_target: ${{  }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Checkout branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git pull
+          git checkout ${{ needs.resolve_pr_refs.outputs.source_branch }}
+          git status
 
 #  check_versions:
 #    name: Check versions in target and source branches
@@ -89,13 +107,11 @@ jobs:
         run: |
           body='Some comment'
 
+#          поменять комментарий
           if [ ${{ needs.is_organization_member.outputs.is_member }}==true ]; then
             body='Update was requested.'
 
-          elif [ ${{ needs.is_organization_member.outputs.is_member }} == true ]; then
-                      body='Update was requested1.'
-
-          elif ${{ needs.is_organization_member.outputs.is_member==false }}; then
+          elif [ ${{ needs.is_organization_member.outputs.is_member }}==false ]; then
             user=${{ github.event.comment.user.login }}
             body='You can update the version only if you are th2 member.
               If you are member, check if your Organization Visibility set to Public at
