@@ -17,38 +17,24 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  is_update_needed:
-    name: Is package version update needed
+  is_update_requested:
+    name: Is package version update requested
     needs: resolve_pr_refs
     if: |
       contains(github.event.comment.body, 'update major') ||
       contains(github.event.comment.body, 'update minor') ||
       contains(github.event.comment.body, 'update patch')
     runs-on: ubuntu-latest
-    outputs:
-      result: ${{ steps.is_needed.outputs.result }}
     steps:
       - name: Version update requested
-        id: is_needed
         run: |
           echo Version update requested
+          echo Source branch: ${{ needs.resolve_pr_refs.outputs.source_branch }}
           echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
-
-          result=false
-          if ${{ needs.resolve_pr_refs.outputs.target_branch == 'master' ||
-              needs.resolve_pr_refs.outputs.target_branch == 'main' }}; then
-            result=true
-            echo Package version will be updated.
-          else
-            echo Target branch should be master or main.
-          fi
-
-          echo Is update needed: $(echo $result)
-          echo "::set-output name=result::$(echo $result)"
 
   is_organization_member:
     name: TH2 membership check
-    needs: is_update_needed
+    needs: is_update_requested
     runs-on: ubuntu-latest
     outputs:
       is_member: ${{ steps.membership_check.outputs.result }}
@@ -62,7 +48,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Is member?
         run: |
-          echo Is update needed: ${{ needs.is_update_needed.outputs.result }}
           result=${{ steps.membership_check.outputs.result }}
           if [ $result == false ]; then
             user=${{ github.event.comment.user.login }}
@@ -91,21 +76,16 @@ jobs:
 
   comment_reply:
     name: Reply to a user's comment
-    needs: [is_update_needed, is_organization_member]
+    needs: is_organization_member
     runs-on: ubuntu-latest
     steps:
       - name: Create comment body
         id: comment_body
         run: |
           body='Some comment'
-          echo Is update needed: ${{ needs.is_update_needed.outputs.result }}
 
-          if ${{ needs.is_update_needed.outputs.result == true &&
-              needs.is_organization_member.outputs.is_member == true}}; then
+          if ${{ needs.is_organization_member.outputs.is_member == true }}; then
             body='Update was requested.'
-
-          elif ${{ needs.is_update_needed.outputs.result == false }}; then
-            body='You can update the version only if the target branch is master or main.'
 
           elif ${{ needs.is_organization_member.outputs.is_member == false }}; then
             user=${{ github.event.comment.user.login }}
@@ -125,5 +105,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: steps.comment_body.outputs.body
+              body: ${{ steps.comment_body.outputs.body }}
             })
