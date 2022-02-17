@@ -146,16 +146,11 @@ jobs:
           new_source_version=$(poetry version -s)
           echo '::set-output name=package_version::$new_source_version'
 
-      - name: Commit & Push changes
-        run: |
-          git add pyproject.toml
-          git commit -m "[TH2-0] Auto commit. Update package version"
-          git push
-
       - name: Check versions in target and source branches
         id: check_versions
         run: |
           check_result=true
+
           if [[ ${{ steps.new_source.outputs.package_version }} \< ${{ steps.target.outputs.package_version }} ||
               ${{ steps.new_source.outputs.package_version }} == ${{ steps.target.outputs.package_version }} ]]; then
             check_result="Package version was updated from ${{ steps.old_source.outputs.package_version }} to
@@ -167,6 +162,15 @@ jobs:
           fi
 
           echo '::set-output name=check_result::$check_result'
+
+      - name: Commit & Push changes
+        run: |
+          if [ ${{ steps.check_versions.outputs.check_result }}==true ]; then
+            git add pyproject.toml
+            git commit -m "[TH2-0] Auto commit. Update package version"
+            git push
+          else
+            echo Cannot make Commit & Push: ${{ steps.check_versions.outputs.check_result }}
 
   comment_reply:
     name: Reply to a user's comment
