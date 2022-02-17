@@ -32,7 +32,7 @@ jobs:
 
           shopt -s nocasematch
           case "${{ github.event.comment.body }}" in
-            "update major" | "update minor" | "update patch" | "update *.*.*" ) result=true;;
+            *update major* | *update minor* | *update patch* | *update [0-9].[0-9].[0-9]* ) result=true;;
           esac
 
           echo '::set-output name=result::$result'
@@ -49,7 +49,7 @@ jobs:
   is_organization_member:
     name: TH2 membership check
     needs: is_update_requested
-    if: ${{ needs.is_update_requested.outputs.result }}
+    if: ${{ needs.is_update_requested.outputs.result==true }}
     runs-on: ubuntu-latest
     outputs:
       is_member: ${{ steps.membership_check.outputs.result }}
