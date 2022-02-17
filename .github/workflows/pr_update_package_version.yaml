@@ -125,7 +125,8 @@ jobs:
         id: new_source
         run: |
           shopt -s nocasematch
-          case "${{ needs.is_update_requested.outputs.version }}" in
+          echo Version: ${{ needs.is_update_requested.outputs.version }}
+          case '${{ needs.is_update_requested.outputs.version }}' in
             "major") poetry version major;;
             "minor") poetry version minor;;
             "patch") poetry version patch;;
