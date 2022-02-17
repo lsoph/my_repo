@@ -3,49 +3,168 @@ name: Update package version
 on: issue_comment
 
 jobs:
-  organization_member_check:
+  resolve_pr_refs:
     # This job only runs for pull request comments
-    name: Organisation member check
+    name: Resolve PR branches
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     outputs:
-      is_member: ${{ steps.is_organization_member.outputs.result }}
+      target_branch: ${{ steps.refs.outputs.base_ref }}
+      source_branch: ${{ steps.refs.outputs.head_ref }}
+    steps:
+      - uses: eficode/resolve-pr-refs@main
+        id: refs
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  is_update_requested:
+    name: Is package version update requested
+    needs: resolve_pr_refs
+    if: |
+      contains(github.event.comment.body, 'update major') ||
+      contains(github.event.comment.body, 'update minor') ||
+      contains(github.event.comment.body, 'update patch')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Version update requested
+        run: |
+          echo Version update requested
+          echo Source branch: ${{ needs.resolve_pr_refs.outputs.source_branch }}
+          echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
+
+  is_organization_member:
+    name: TH2 membership check
+    needs: is_update_requested
+    runs-on: ubuntu-latest
+    outputs:
+      is_member: ${{ steps.membership_check.outputs.result }}
+    steps:
+      - name: Membership check
+        id: membership_check
+        uses: jamessingleton/is-organization-member@main
+        with:
+          organization: th2-net
+          username: ${{ github.event.issue.user.login }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Is member?
+        run: |
+          result=${{ steps.membership_check.outputs.result }}
+          if [ $result == false ]; then
+            user=${{ github.event.comment.user.login }}
+            echo Either ${user} is not part of the th2-net organization
+            echo or ${user} has its Organization Visibility set to Private at
+            echo https://github.com/orgs/th2-net/people?query=${user}
+            echo
+            echo Ensure you change your Organization Visibility to Public and
+            echo trigger the test again.
+            exit 1
+          elif [ $result == true ]; then
+            user=${{ github.event.comment.user.login }}
+            echo '::set-output name=user_login::$user'
+            echo ${user} is part of the th2-net organization
+          fi
+
+  update_package_version:
+    name: Update package version
+    needs: [resolve_pr_refs, is_organization_member]
+    if: ${{ needs.is_organization_member.outputs.is_member }}
+    runs-on: ubuntu-latest
+    outputs:
+      version_target: ${{ steps.target.outputs.package_version }}
+      old_version_source: ${{ steps.old_source.outputs.package_version }}
+      new_version_source: ${{ steps.new_source.outputs.package_version }}
     steps:
       - uses: actions/checkout@v2
 
-      - name: Check if organization member
-        id: is_organization_member
-        uses: jamessingleton/is-organization-member@v1
-        with:
-          organization: th2
-          username: ${{ github.event.issue.user.login }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  package_version_update:
-    name: Package version update
-    needs: organization_member_check
-    if: ${{ needs.organization_member_check.outputs.is_member == true }}
-    runs-on: ubuntu-latest
-    steps:
       - name: Install Poetry
         uses: snok/install-poetry@v1
 
-      - name: Get package version
-        id: pack_ver
+      - name: Git configuration
         run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git pull
+
+      - name: Checkout on target branch
+        id: target
+        run: |
+          git checkout ${{ needs.resolve_pr_refs.outputs.target_branch }}
           echo '::set-output name=package_version::$(poetry version -s)'
-          echo '::set-output name=is_updated::true'
+          echo Target branch package version: $(poetry version -s)
+
+      - name: Checkout on source branch
+        id: old_source
+        run: |
+          git checkout ${{ needs.resolve_pr_refs.outputs.source_branch }}
+          echo '::set-output name=package_version::$(poetry version -s)'
+
       - name: Update version
-        id: update_version
+        id: new_source
         run: |
           shopt -s nocasematch
-          case $github.event.comment.body in
+          case "${{ github.event.comment.body }}" in
           "update major") poetry version major;;
           "update minor") poetry version minor;;
           "update patch") poetry version patch;;
-          *) steps.pack_ver.outputs.is_updated=false;;
+          *) echo Update was not requested;;
           esac
 
-      - name: Create Comment
-        if: ${{ steps.update_version.outputs.is_updated }}
-        run: echo "Package version raised from $steps.pack_ver.outputs.package_version to $(poetry version -s) successfully."
+          echo '::set-output name=package_version::$(poetry version -s)'
+
+      - name: Commit changes
+        run: |
+          git add pyproject.toml
+          git commit -m "[TH2-0] Auto commit. Update package version"
+          git push
+
+#      - name: Push changes
+#        uses: ad-m/github-push-action@master
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
+
+
+#  check_versions:
+#    name: Check versions in target and source branches
+#    runs-on: ubuntu-latest
+#    steps:
+
+#  push_on_github:
+#    name: Commit and push on github
+#    runs-on: ubuntu-latest
+#    steps:
+
+  comment_reply:
+    name: Reply to a user's comment
+    needs: is_organization_member
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create comment body
+        id: comment_body
+        run: |
+          body='Some comment'
+
+          if [ ${{ needs.is_organization_member.outputs.is_member }}==true ]; then
+            body='Update was requested.'
+
+          elif [ ${{ needs.is_organization_member.outputs.is_member }}==false ]; then
+            user=${{ github.event.comment.user.login }}
+            body='You can update the version only if you are th2 member.
+              If you are member, check if your Organization Visibility set to Public at
+              https://github.com/orgs/th2-net/people?query=${user}.'
+          fi
+
+          echo Comment body: $body
+          echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
+          echo "::set-output name=body::$(echo $body)"
+
+      - uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '${{ steps.comment_body.outputs.body }}'
+            })

@@ -1,0 +1,88 @@
+name: Update package version
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  package_version_update:
+    # This job only runs for pull request comments
+    name: Package version update
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if organization member
+        id: is_organization_member
+        uses: jamessingleton/is-organization-member@main
+        with:
+          organization: th2-net
+          username: ${{ github.event.issue.user.login }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Is member?
+        id: is_member
+        run: |
+          result=${{ steps.is_organization_member.outputs.result }}
+          if [ $result == false ]; then
+              user=${{ github.event.comment.user.login }}
+              echo Either ${user} is not part of the th2-net organization
+              echo or ${user} has its Organization Visibility set to Private at
+              echo https://github.com/orgs/th2-net/people?query=${user}
+              echo
+              echo Ensure you change your Organization Visibility to Public and
+              echo trigger the test again.
+              exit 1
+          fi
+          if [ $result == true ]; then
+              user=${{ github.event.comment.user.login }}
+              echo '::set-output name=user_login::$user'
+              echo ${user} is part of the th2-net organization
+          fi
+
+      - uses: actions/checkout@v2
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: resolve pr refs
+        id: refs
+        uses: eficode/resolve-pr-refs@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get package version
+        id: pack_ver
+        run: |
+          echo '::set-output name=package_version::$(poetry version -s)'
+          echo Current package version is $(poetry version -s)
+
+      - name: Checkout branch
+        run: |
+          git config --global user.name lsoph
+          git config --global user.email sofia.lobenko@exactpro.com
+          git pull
+          echo Head ref: ${{ steps.refs.outputs.head_ref }}
+          git checkout ${{ steps.refs.outputs.head_ref }}
+
+      - name: Update version
+        id: update_version
+        env:
+          event_body: ${{ github.event.comment.body }}
+        run: |
+          echo Event body: $event_body
+          shopt -s nocasematch
+          case $event_body in
+          "update major") poetry version major && echo New package version is $(poetry version -s);;
+          "update minor") poetry version minor && echo New package version is $(poetry version -s);;
+          "update patch") poetry version patch && echo New package version is $(poetry version -s);;
+          *) echo Update was not requested && exit 0;;
+          esac
+
+      - name: Update changes in GitHub repository
+        run: |
+          git add .
+          git commit -m '[TH2-0] Auto commit. Package version updated'
+          git push
+
+      - name: Create Comment
+        run: echo Package version raised from $steps.pack_ver.outputs.package_version to $(poetry version -s) successfully.
