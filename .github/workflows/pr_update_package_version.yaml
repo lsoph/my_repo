@@ -67,7 +67,7 @@ jobs:
   update_package_version:
     name: Update package version
     needs: [resolve_pr_refs, is_organization_member]
-    if: ${{ needs.is_organization_member.outputs.is_member==true }}
+    if: ${{ needs.is_organization_member.outputs.is_member == true }}
     runs-on: ubuntu-latest
 #    outputs:
 #      old_version_source: ${{  }}
