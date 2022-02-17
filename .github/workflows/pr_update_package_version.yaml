@@ -43,8 +43,8 @@ jobs:
             echo Target branch should be master or main.
           fi
 
-          echo Is update needed: $result
-          echo '::set-output name=result::$(echo ${result})'
+          echo Is update needed: $(echo $result)
+          echo "::set-output name=result::$(echo $result)"
 
   is_organization_member:
     name: TH2 membership check
