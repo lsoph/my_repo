@@ -95,6 +95,7 @@ jobs:
           fi
 
           echo Comment body: $body
+          echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
           echo "::set-output name=body::$(echo $body)"
 
       - uses: actions/github-script@v5
@@ -105,5 +106,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ${{ steps.comment_body.outputs.body }}
+              body: '${{ steps.comment_body.outputs.body }}'
             })
