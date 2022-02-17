@@ -73,6 +73,7 @@ jobs:
       version_target: ${{ steps.target.outputs.package_version }}
       old_version_source: ${{ steps.old_source.outputs.package_version }}
       new_version_source: ${{ steps.new_source.outputs.package_version }}
+      versions_check: ${{ steps.check_versions.outputs.result }}
     steps:
       - uses: actions/checkout@v2
 
@@ -111,41 +112,40 @@ jobs:
 
           echo '::set-output name=package_version::$(poetry version -s)'
 
-      - name: Commit changes
+      - name: Commit & Push changes
         run: |
           git add pyproject.toml
           git commit -m "[TH2-0] Auto commit. Update package version"
           git push
 
-#      - name: Push changes
-#        uses: ad-m/github-push-action@master
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
+      - name: Check versions in target and source branches
+        id: check_versions
+        run: |
+          result=true
+          if [ ${{ steps.new_source.outputs.package_version }} \< ${{ steps.target.outputs.package_version }} ||
+              ${{ steps.new_source.outputs.package_version }} == ${{ steps.target.outputs.package_version }}]; then
+            result=false
 
-
-#  check_versions:
-#    name: Check versions in target and source branches
-#    runs-on: ubuntu-latest
-#    steps:
-
-#  push_on_github:
-#    name: Commit and push on github
-#    runs-on: ubuntu-latest
-#    steps:
+          echo '::set-output name=result::$result'
 
   comment_reply:
     name: Reply to a user's comment
-    needs: is_organization_member
+    needs: [is_organization_member, update_package_version]
     runs-on: ubuntu-latest
     steps:
       - name: Create comment body
         id: comment_body
         run: |
-          body='Some comment'
+          if [ ${{ needs.is_organization_member.outputs.is_member }}==true &&
+              ${{ needs.update_package_version.outputs.versions_check }}==true]; then
+            body='Package version was updated from ${{ needs.update_package_version.outputs.old_version_source }} to
+              ${{ needs.update_package_version.outputs.new_version_source }} successfully.'
 
-          if [ ${{ needs.is_organization_member.outputs.is_member }}==true ]; then
-            body='Update was requested.'
+          if [ ${{ needs.is_organization_member.outputs.is_member }}==true &&
+              ${{ needs.update_package_version.outputs.versions_check }}==false]; then
+            body='Package version was updated from ${{ needs.update_package_version.outputs.old_version_source }} to
+              ${{ needs.update_package_version.outputs.new_version_source }}, but package version in target branch
+              is ${{ needs.update_package_version.outputs.version_target }}.'
 
           elif [ ${{ needs.is_organization_member.outputs.is_member }}==false ]; then
             user=${{ github.event.comment.user.login }}
