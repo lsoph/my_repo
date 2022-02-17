@@ -170,18 +170,18 @@ jobs:
         run: |
           echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
 
-          if [ ${{ needs.is_organization_member.outputs.is_member }}==true &&
-              ${{ needs.update_package_version.outputs.versions_check }}==true ]; then
+          if [[ ${{ needs.is_organization_member.outputs.is_member }}==true &&
+              ${{ needs.update_package_version.outputs.versions_check }}==true ]]; then
             body='Package version was updated from ${{ needs.update_package_version.outputs.old_version_source }} to
               ${{ needs.update_package_version.outputs.new_version_source }} successfully.'
 
-          elif [ ${{ needs.is_organization_member.outputs.is_member }}==true &&
-              ${{ needs.update_package_version.outputs.versions_check }}==false ]; then
+          elif [[ ${{ needs.is_organization_member.outputs.is_member }}==true &&
+              ${{ needs.update_package_version.outputs.versions_check }}==false ]]; then
             body='Package version was updated from ${{ needs.update_package_version.outputs.old_version_source }} to
               ${{ needs.update_package_version.outputs.new_version_source }}, but package version in target branch
               is ${{ needs.update_package_version.outputs.version_target }}.'
 
-          elif [ ${{ needs.is_organization_member.outputs.is_member }}==false ]; then
+          elif [[ ${{ needs.is_organization_member.outputs.is_member }}==false ]]; then
             user=${{ github.event.comment.user.login }}
             body="You can update the version only if you are th2 member.
               If you are member, check whether your Organization Visibility set to Public at
