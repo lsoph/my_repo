@@ -20,34 +20,32 @@ jobs:
   is_update_requested:
     name: Is version update requested
     needs: resolve_pr_refs
-    if: contains(github.event.comment.body, 'update')
+    if: contains(github.event.comment.body, '$ update')
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.is_requested.outputs.result }}
-      update_type: ${{ steps.is_requested.outputs.type }}
+      version: ${{ steps.is_requested.outputs.type }}
     steps:
       - name: Version update requested
         id: is_requested
         run: |
           result=true
-          type=false
 
-          if echo "${{ github.event.comment.body }}" | grep -Eqi '* update major *'; then
-            type=major
-          elif echo "${{ github.event.comment.body }}" | grep -Eqi '* update minor *'; then
-            type=minor
-          elif echo "${{ github.event.comment.body }}" | grep -Eqi '* update patch *'; then
-            type=patch
-          elif echo "${{ github.event.comment.body }}" | grep -Eqi '* update [0-9]\.[0-9]\.[0-9] *'; then
-            echo '::set-output name=type::patch'
-          else
-            result=false
-          fi
+          shopt -s nocasematch
+
+          case "${{ github.event.comment.body }}" in
+            "$ update major") version=major;;
+            "$ update minor") version=minor;;
+            "$ update patch") version=patch;;
+            $[[:space:]]update[[:space:]][0-9]+\.[0-9]+\.[0-9]+)
+              version=$(echo ${{ github.event.comment.body }} | sed 's|.*[0-9]||');;
+            * ) result=false && version=false;;
+          esac
 
           echo '::set-output name=result::$result'
-          echo '::set-output name=type::$type'
+          echo '::set-output name=version::$version'
 
-          if [ $result==true && ]; then
+          if [ $result==true ]; then
             echo Version update was requested
             echo Source branch: ${{ needs.resolve_pr_refs.outputs.source_branch }}
             echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
@@ -128,10 +126,10 @@ jobs:
         run: |
           shopt -s nocasematch
           case "${{ github.event.comment.body }}" in
-          "update major") poetry version major;;
-          "update minor") poetry version minor;;
-          "update patch") poetry version patch;;
-          *) echo Update was not requested;;
+            "update major") poetry version major;;
+            "update minor") poetry version minor;;
+            "update patch") poetry version patch;;
+            *) echo Update was not requested;;
           esac
 
           echo '::set-output name=package_version::$(poetry version -s)'
