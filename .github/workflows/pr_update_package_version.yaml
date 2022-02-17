@@ -138,7 +138,7 @@ jobs:
             "major") poetry version major;;
             "minor") poetry version minor;;
             "patch") poetry version patch;;
-            [0-9]+\.[0-9]+\.[0-9]+) poetry version ${{ needs.is_update_requested.outputs.version }};;
+            [0-9]\.[0-9]\.[0-9]) poetry version ${{ needs.is_update_requested.outputs.version }};;
           esac
 
           echo '::set-output name=package_version::$(poetry version -s)'
