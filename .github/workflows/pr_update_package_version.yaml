@@ -84,10 +84,10 @@ jobs:
         run: |
           body='Some comment'
 
-          if ${{ needs.is_organization_member.outputs.is_member == true }}; then
+          if ${{ needs.is_organization_member.outputs.is_member==true }}; then
             body='Update was requested.'
 
-          elif ${{ needs.is_organization_member.outputs.is_member == false }}; then
+          elif ${{ needs.is_organization_member.outputs.is_member==false }}; then
             user=${{ github.event.comment.user.login }}
             body='You can update the version only if you are th2 member.
               If you are member, check if your Organization Visibility set to Public at
