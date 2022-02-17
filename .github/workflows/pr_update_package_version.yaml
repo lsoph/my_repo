@@ -95,7 +95,7 @@ jobs:
           fi
 
           echo Comment body: $body
-          echo '::set-output name=body::$body'
+          echo "::set-output name=body::$(echo $body)"
 
       - uses: actions/github-script@v5
         with:
