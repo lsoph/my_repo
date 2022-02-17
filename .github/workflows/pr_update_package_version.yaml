@@ -144,7 +144,7 @@ jobs:
           esac
 
           new_source_version=$(poetry version -s)
-          echo '::set-output name=package_version::$(echo $new_source_version)'
+          echo '::set-output name=package_version::$new_source_version'
 
       - name: Commit & Push changes
         run: |
