@@ -69,6 +69,11 @@ jobs:
 #    runs-on: ubuntu-latest
 #    steps:
 
+#  check_versions:
+#    name: Check versions in target and source branches
+#    runs-on: ubuntu-latest
+#    steps:
+
 #  push_on_github:
 #    name: Commit and push on github
 #    runs-on: ubuntu-latest
@@ -84,8 +89,11 @@ jobs:
         run: |
           body='Some comment'
 
-          if ${{ needs.is_organization_member.outputs.is_member==true }}; then
+          if [ ${{ needs.is_organization_member.outputs.is_member }}==true ]; then
             body='Update was requested.'
+
+          elif [ ${{ needs.is_organization_member.outputs.is_member }} == true ]; then
+                      body='Update was requested1.'
 
           elif ${{ needs.is_organization_member.outputs.is_member==false }}; then
             user=${{ github.event.comment.user.login }}
