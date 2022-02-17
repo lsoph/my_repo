@@ -18,7 +18,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   is_update_requested:
-    name: Is package version update requested
+    name: Is version update requested
     needs: resolve_pr_refs
     if: |
       contains(github.event.comment.body, 'update major') ||
@@ -142,7 +142,7 @@ jobs:
             body='Package version was updated from ${{ needs.update_package_version.outputs.old_version_source }} to
               ${{ needs.update_package_version.outputs.new_version_source }} successfully.'
 
-          if [ ${{ needs.is_organization_member.outputs.is_member }}==true &&
+          elif [ ${{ needs.is_organization_member.outputs.is_member }}==true &&
               ${{ needs.update_package_version.outputs.versions_check }}==false]; then
             body='Package version was updated from ${{ needs.update_package_version.outputs.old_version_source }} to
               ${{ needs.update_package_version.outputs.new_version_source }}, but package version in target branch
