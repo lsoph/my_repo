@@ -115,12 +115,13 @@ jobs:
         run: |
           git add pyproject.toml
           git commit -m "[TH2-0] Auto commit. Update package version"
+          git push
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
+#      - name: Push changes
+#        uses: ad-m/github-push-action@master
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
 
 
 #  check_versions:
