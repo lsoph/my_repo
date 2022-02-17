@@ -151,7 +151,7 @@ jobs:
         run: |
           check_result=true
 
-          if [[ ${{ steps.new_source.outputs.package_version }} \< ${{ steps.target.outputs.package_version }} ||
+          if [[ ${{ steps.new_source.outputs.package_version }} < ${{ steps.target.outputs.package_version }} ||
               ${{ steps.new_source.outputs.package_version }} == ${{ steps.target.outputs.package_version }} ]]; then
             check_result="Package version was updated from ${{ steps.old_source.outputs.package_version }} to
               ${{ steps.new_source.outputs.package_version }}, but package version in target branch
