@@ -24,19 +24,28 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.is_requested.outputs.result }}
+      update_type: ${{ steps.is_requested.outputs.type }}
     steps:
       - name: Version update requested
         id: is_requested
         run: |
-          result=false
+          result=true
+          type=false
 
-          shopt -s nocasematch
-          case "${{ github.event.comment.body }}" in
-            *[update major]* | *[update minor]* | *[update patch]* | *[update ][0-9].[0-9].[0-9]* ) result=true;;
-          esac
+          if echo "${{ github.event.comment.body }}" | grep -Eqi '* update major *'; then
+            type=major
+          elif echo "${{ github.event.comment.body }}" | grep -Eqi '* update minor *'; then
+            type=minor
+          elif echo "${{ github.event.comment.body }}" | grep -Eqi '* update patch *'; then
+            type=patch
+          elif echo "${{ github.event.comment.body }}" | grep -Eqi '* update [0-9]\.[0-9]\.[0-9] *'; then
+            echo '::set-output name=type::patch'
+          else
+            result=false
+          fi
 
           echo '::set-output name=result::$result'
-          echo Update requested: $result
+          echo '::set-output name=type::$type'
 
           if [ $result==true && ]; then
             echo Version update was requested
