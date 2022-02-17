@@ -43,8 +43,8 @@ jobs:
             * ) result=0;;
           esac
 
-          echo '::set-output name=result::$result'
-          echo '::set-output name=version::$(echo $version)'
+          echo "::set-output name=result::$result"
+          echo "::set-output name=version::$(echo $version)"
 
           if [ $result==1 ]; then
             echo Version update was requested
