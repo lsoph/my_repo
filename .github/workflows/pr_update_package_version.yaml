@@ -55,6 +55,11 @@ jobs:
             echo Version update was not requested
           fi
 
+      - name: view output
+        run: |
+          echo steps.is_requested.outputs.version = ${{ steps.is_requested.outputs.version }}
+          echo steps.is_requested.outputs.result = ${{ steps.is_requested.outputs.result }}
+
   is_organization_member:
     name: TH2 membership check
     needs: is_update_requested
