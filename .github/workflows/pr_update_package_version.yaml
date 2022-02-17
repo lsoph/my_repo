@@ -69,10 +69,10 @@ jobs:
     needs: [resolve_pr_refs, is_organization_member]
     if: ${{ needs.is_organization_member.outputs.is_member }}
     runs-on: ubuntu-latest
-    outputs:
-      old_version_source: ${{  }}
-      new_version_source: ${{  }}
-      version_target: ${{  }}
+#    outputs:
+#      old_version_source: ${{  }}
+#      new_version_source: ${{  }}
+#      version_target: ${{  }}
     steps:
       - uses: actions/checkout@v2
 
