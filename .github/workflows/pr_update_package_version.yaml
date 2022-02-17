@@ -69,10 +69,10 @@ jobs:
     needs: [resolve_pr_refs, is_organization_member]
     if: ${{ needs.is_organization_member.outputs.is_member }}
     runs-on: ubuntu-latest
-#    outputs:
-#      old_version_source: ${{  }}
-#      new_version_source: ${{  }}
-#      version_target: ${{  }}
+    outputs:
+      version_target: ${{ steps.target.outputs.package_version }}
+      old_version_source: ${{ steps.old_source.outputs.package_version }}
+      new_version_source: ${{ steps.new_source.outputs.package_version }}
     steps:
       - uses: actions/checkout@v2
 
@@ -85,23 +85,40 @@ jobs:
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git pull
 
+      - name: Checkout on target branch
+        id: target
+        run: |
+          git checkout ${{ needs.resolve_pr_refs.outputs.target_branch }}
+          echo '::set-output name=package_version::$(poetry version -s)'
+          echo Target branch package version: $(poetry version -s)
+
       - name: Checkout on source branch
         id: old_source
         run: |
           git checkout ${{ needs.resolve_pr_refs.outputs.source_branch }}
           echo '::set-output name=package_version::$(poetry version -s)'
-          echo Old package version is $(poetry version -s)
 
       - name: Update version
         id: new_source
         run: |
           shopt -s nocasematch
           case "${{ github.event.comment.body }}" in
-          "update major") poetry version major && echo New package version is $(poetry version -s);;
-          "update minor") poetry version minor && echo New package version is $(poetry version -s);;
-          "update patch") poetry version patch && echo New package version is $(poetry version -s);;
+          "update major") poetry version major;;
+          "update minor") poetry version minor;;
+          "update patch") poetry version patch;;
           *) echo Update was not requested;;
           esac
+
+          echo '::set-output name=package_version::$(poetry version -s)'
+
+      - name: Commit changes
+        run: git commit -m "[TH2-0] Auto commit. Update package version"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
 
 
 #  check_versions:
