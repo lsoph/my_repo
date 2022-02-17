@@ -125,11 +125,11 @@ jobs:
         id: new_source
         run: |
           shopt -s nocasematch
-          case "${{ github.event.comment.body }}" in
-            "update major") poetry version major;;
-            "update minor") poetry version minor;;
-            "update patch") poetry version patch;;
-            *) echo Update was not requested;;
+          case "${{ needs.is_update_requested.outputs.version }}" in
+            "major") poetry version major;;
+            "minor") poetry version minor;;
+            "patch") poetry version patch;;
+            [0-9]+\.[0-9]+\.[0-9]+) poetry version ${{ needs.is_update_requested.outputs.version }};;
           esac
 
           echo '::set-output name=package_version::$(poetry version -s)'
