@@ -96,7 +96,7 @@ jobs:
         id: new_source
         run: |
           shopt -s nocasematch
-          case ${{ github.event.comment.body }} in
+          case "${{ github.event.comment.body }}" in
           "update major") poetry version major && echo New package version is $(poetry version -s);;
           "update minor") poetry version minor && echo New package version is $(poetry version -s);;
           "update patch") poetry version patch && echo New package version is $(poetry version -s);;
