@@ -20,22 +20,33 @@ jobs:
   is_update_requested:
     name: Is version update requested
     needs: resolve_pr_refs
-    if: |
-      contains(github.event.comment.body, 'update major') ||
-      contains(github.event.comment.body, 'update minor') ||
-      contains(github.event.comment.body, 'update patch') ||
-      contains(github.event.comment.body, 'update *.*.*')
+    if: contains(github.event.comment.body, 'update')
     runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.is_requested.outputs.result }}
     steps:
       - name: Version update requested
+        id: is_requested
         run: |
           echo Version update requested
           echo Source branch: ${{ needs.resolve_pr_refs.outputs.source_branch }}
           echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
 
+          result=false
+
+          shopt -s nocasematch
+          case "${{ github.event.comment.body }}" in
+            "update major" | "update minor" | "update patch" | "update "+*.*.* ) result=true;;
+          esac
+
+          echo '::set-output name=result::$result'
+          echo Update requested: $result
+
+
   is_organization_member:
     name: TH2 membership check
     needs: is_update_requested
+    if: ${{ needs.is_update_requested.outputs.result }}
     runs-on: ubuntu-latest
     outputs:
       is_member: ${{ steps.membership_check.outputs.result }}
