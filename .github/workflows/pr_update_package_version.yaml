@@ -23,7 +23,8 @@ jobs:
     if: |
       contains(github.event.comment.body, 'update major') ||
       contains(github.event.comment.body, 'update minor') ||
-      contains(github.event.comment.body, 'update patch')
+      contains(github.event.comment.body, 'update patch') ||
+      contains(github.event.comment.body, 'update *.*.*')
     runs-on: ubuntu-latest
     steps:
       - name: Version update requested
