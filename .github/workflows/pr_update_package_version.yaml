@@ -171,6 +171,7 @@ jobs:
             git push
           else
             echo Cannot make Commit & Push: ${{ steps.check_versions.outputs.check_result }}
+          fi
 
   comment_reply:
     name: Reply to a user's comment
