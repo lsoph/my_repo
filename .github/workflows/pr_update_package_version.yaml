@@ -61,7 +61,7 @@ jobs:
           echo steps.is_requested.outputs.result = ${{ steps.is_requested.outputs.result }}
 
   is_organization_member:
-    name: TH2 membership check
+    name: Is th2 member
     needs: is_update_requested
     if: ${{ needs.is_update_requested.outputs.result }}
     runs-on: ubuntu-latest
@@ -170,16 +170,18 @@ jobs:
         run: |
           echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
 
+          old_version=${{ needs.update_package_version.outputs.old_version_source }}
+          new_version=${{ needs.update_package_version.outputs.new_version_source }}
+          target_version=${{ needs.update_package_version.outputs.version_target }}
+
           if [[ ${{ needs.is_organization_member.outputs.is_member }}==true &&
               ${{ needs.update_package_version.outputs.versions_check }}==true ]]; then
-            body='Package version was updated from ${{ needs.update_package_version.outputs.old_version_source }} to
-              ${{ needs.update_package_version.outputs.new_version_source }} successfully.'
+            body='Package version was updated from $old_version to $new_version successfully.'
 
           elif [[ ${{ needs.is_organization_member.outputs.is_member }}==true &&
               ${{ needs.update_package_version.outputs.versions_check }}==false ]]; then
-            body='Package version was updated from ${{ needs.update_package_version.outputs.old_version_source }} to
-              ${{ needs.update_package_version.outputs.new_version_source }}, but package version in target branch
-              is ${{ needs.update_package_version.outputs.version_target }}.'
+            body='Package version was updated from $old_version to $new_version, but package version in target branch
+              is $target_version.'
 
           elif [[ ${{ needs.is_organization_member.outputs.is_member }}==false ]]; then
             user=${{ github.event.comment.user.login }}
