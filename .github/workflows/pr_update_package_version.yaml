@@ -69,23 +69,40 @@ jobs:
     needs: [resolve_pr_refs, is_organization_member]
     if: ${{ needs.is_organization_member.outputs.is_member }}
     runs-on: ubuntu-latest
-#    outputs:
-#      old_version_source: ${{  }}
-#      new_version_source: ${{  }}
-#      version_target: ${{  }}
+    outputs:
+      old_version_source: ${{  }}
+      new_version_source: ${{  }}
+      version_target: ${{  }}
     steps:
       - uses: actions/checkout@v2
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
 
-      - name: Checkout branch
+      - name: Git configuration
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git pull
+
+      - name: Checkout on source branch
+        id: old_source
+        run: |
           git checkout ${{ needs.resolve_pr_refs.outputs.source_branch }}
-          git status
+          echo '::set-output name=package_version::$(poetry version -s)'
+          echo Old package version is $(poetry version -s)
+
+      - name: Update version
+        id: new_source
+        run: |
+          shopt -s nocasematch
+          case ${{ github.event.comment.body }} in
+          "update major") poetry version major && echo New package version is $(poetry version -s);;
+          "update minor") poetry version minor && echo New package version is $(poetry version -s);;
+          "update patch") poetry version patch && echo New package version is $(poetry version -s);;
+          *) echo Update was not requested;;
+          esac
+
 
 #  check_versions:
 #    name: Check versions in target and source branches
