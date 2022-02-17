@@ -30,6 +30,7 @@ jobs:
         id: is_requested
         run: |
           result=1
+          version=0
 
           shopt -s nocasematch
 
@@ -39,11 +40,11 @@ jobs:
             "$ update patch") version=patch;;
             $[[:space:]]update[[:space:]][0-9]+\.[0-9]+\.[0-9]+)
               version=$(echo ${{ github.event.comment.body }} | sed 's|.*[0-9]||');;
-            * ) result=0 && version=0;;
+            * ) result=0;;
           esac
 
           echo '::set-output name=result::$result'
-          echo '::set-output name=version::$version'
+          echo '::set-output name=version::$(echo $version)'
 
           if [ $result==1 ]; then
             echo Version update was requested
