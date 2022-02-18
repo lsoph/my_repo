@@ -166,7 +166,7 @@ jobs:
 
       - name: Commit & Push changes
         run: |
-          if [[ ${{ steps.check_versions.outputs.result }}==true ]]; then
+          if ${{ steps.check_versions.outputs.result }}; then
             git add pyproject.toml
             git commit -m "[TH2-0] Auto commit. Update package version"
             git push
