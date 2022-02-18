@@ -163,6 +163,7 @@ jobs:
 
           echo "::set-output name=result::$result"
           echo "::set-output name=warning_message::$warning_message"
+          echo $warning_message
 
       - name: Commit & Push changes
         run: |
