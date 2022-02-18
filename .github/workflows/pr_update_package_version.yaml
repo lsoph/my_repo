@@ -3,12 +3,11 @@ name: Update package version
 on:
   issue_comment:
     types: [created]
-    if: ${{ github.event.issue.pull_request }}
 
 jobs:
   resolve_pr_refs:
     name: Resolve PR branches
-    if: ${{ github.event.issue.pull_request }}
+    if: ${{ github.event.issue.pull_request }} && contains(github.event.comment.body, '$ update')
     runs-on: ubuntu-latest
     outputs:
       target_branch: ${{ steps.refs.outputs.base_ref }}
@@ -22,7 +21,6 @@ jobs:
   is_update_requested:
     name: Is version update requested
     needs: resolve_pr_refs
-    if: contains(github.event.comment.body, '$ update')
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.is_requested.outputs.result }}
