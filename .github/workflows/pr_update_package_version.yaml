@@ -43,15 +43,7 @@ jobs:
             * ) result=false;;
           esac
 
-          case "$ update minor 0.0.1" in
-            "$ update major") echo major;;
-            "$ update minor") echo minor;;
-            "$ update patch") echo patch;;
-            \$[[:space:]]update[[:space:]][0-9]\.[0-9]\.[0-9]) echo numb;;
-            * ) echo WhaT;;
-          esac
-
-          echo "::set-output name=result::$result"
+          echo "::set-output name=result::$(echo $result)"
           echo "::set-output name=version::$(echo $version)"
 
           if $result; then
@@ -85,6 +77,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Is member?
         run: |
+          echo Is update requested: ${{ needs.is_update_requested.outputs.result }}
+
           result=${{ steps.membership_check.outputs.result }}
           if [ $result == false ]; then
             user=${{ github.event.comment.user.login }}
