@@ -182,7 +182,7 @@ jobs:
         run: |
           echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
 
-          old_version=${{ needs.update_package_version.outputs.old_version_source }}
+          old_version=$needs.update_package_version.outputs.old_version_source
           new_version=${{ needs.update_package_version.outputs.new_version_source }}
           target_version=${{ needs.update_package_version.outputs.version_target }}
 
