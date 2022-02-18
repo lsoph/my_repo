@@ -147,27 +147,26 @@ jobs:
         id: check_versions
         env:
           new_source_version: ${{ steps.new_source.outputs.package_version }}
+          old_source_version: ${{ steps.old_source.outputs.package_version }}
+          target_version: ${{ steps.target.outputs.package_version }}
         run: |
           result=true
           message="no message"
 
-          old_source_version=$(echo "${{ steps.old_source.outputs.package_version }}")
-          target_version='${{ steps.target.outputs.package_version }}'
-
-          if [[ $new_source_version > $target_version ||
-              $new_source_version != "$old_source_version" ]]; then
+          if [[ ${{ env.new_source_version }} > ${{ env.target_version }} ||
+                ${{ env.new_source_version }} != ${{ old_source_version }} ]]; then
             message="Package version was updated from $old_version to $new_version successfully."
 
-          elif [[ ${{ env.new_source_version }} < $target_version ||
-              $new_source_version == $target_version ||
-              $new_source_version != "$old_source_version" ]]; then
-            message="Package version was updated from $old_source_version to
-              ${{ env.new_source_version }}, but package version in target branch is $target_version."
+          elif [[ ${{ env.new_source_version }} < ${{ env.target_version }} ||
+                  ${{ env.new_source_version }} == ${{ env.target_version }} ||
+                  ${{ env.new_source_version }} != ${{ old_source_version }} ]]; then
+            message="Package version was updated from ${{ old_source_version }} to
+              ${{ env.new_source_version }}, but package version in target branch is ${{ env.target_version }}."
 
-          elif [[ $new_source_version == $(echo $old_source_version) ]]; then
+          elif [[ ${{ env.new_source_version }} == ${{ old_source_version }} ]]; then
             result=false
-            message="Package version is already ${{ steps.new_source.outputs.package_version }}.
-              Nothing to be committed"
+            message="Package version is already ${{ env.new_source_version }}. Nothing to be committed"
+
           fi
 
           echo "::set-output name=result::$result"
