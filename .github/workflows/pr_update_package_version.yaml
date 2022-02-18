@@ -150,8 +150,8 @@ jobs:
           message="no message"
 
           new_source_version="${{ steps.new_source.outputs.package_version }}"
-          old_source_version="${{ steps.old_source.outputs.package_version }}"
-          target_version="${{ steps.target.outputs.package_version }}"
+          old_source_version='${{ steps.old_source.outputs.package_version }}'
+          target_version='${{ steps.target.outputs.package_version }}'
 
           if [[ $new_source_version > $target_version ||
               $new_source_version != $old_source_version ]]; then
