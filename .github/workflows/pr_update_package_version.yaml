@@ -102,7 +102,7 @@ jobs:
       old_version_source: ${{ steps.old_source.outputs.package_version }}
       new_version_source: ${{ steps.new_source.outputs.package_version }}
       versions_check_result: ${{ steps.check_versions.outputs.result }}
-      versions_check_warning_message: ${{ steps.check_versions.outputs.warning_message }}
+      versions_check_message: ${{ steps.check_versions.outputs.warning_message }}
     steps:
       - uses: actions/checkout@v2
 
@@ -147,22 +147,30 @@ jobs:
         id: check_versions
         run: |
           result=true
-          warning_message=false
+          message="no message"
 
-          if [[ ${{ steps.new_source.outputs.package_version }} < ${{ steps.target.outputs.package_version }} ||
-              ${{ steps.new_source.outputs.package_version }} == ${{ steps.target.outputs.package_version }} ||
-              ${{ steps.new_source.outputs.package_version }} != ${{ steps.old_source.outputs.package_version }} ]]
-            then warning_message="Package version was updated from ${{ steps.old_source.outputs.package_version }} to
-              ${{ steps.new_source.outputs.package_version }}, but package version in target branch
-              is ${{ steps.target.outputs.package_version }}."
-          elif [[ ${{ steps.new_source.outputs.package_version }} == ${{ steps.old_source.outputs.package_version }} ]]
-            then result=false
-            warning_message="Package version is already ${{ steps.new_source.outputs.package_version }}.
+          new_source_version=${{ steps.new_source.outputs.package_version }}
+          old_source_version=${{ steps.old_source.outputs.package_version }}
+          target_version=${{ steps.target.outputs.package_version }}
+
+          if [[ $new_source_version > $target_version ||
+              $new_source_version != $old_source_version ]]; then
+            message="Package version was updated from $old_version to $new_version successfully."
+
+          elif [[ $new_source_version < $target_version ||
+              $new_source_version == $target_version ||
+              $new_source_version != $old_source_version ]]; then
+            message="Package version was updated from $old_source_version to
+              $new_source_version, but package version in target branch is $target_version."
+
+          elif [[ $new_source_version == $old_source_version ]]; then
+            result=false
+            message="Package version is already ${{ steps.new_source.outputs.package_version }}.
               Nothing to be committed"
           fi
 
           echo "::set-output name=result::$result"
-          echo "::set-output name=warning_message::$warning_message"
+          echo "::set-output name=message::$message"
           echo $warning_message
 
       - name: Commit & Push changes
@@ -209,23 +217,6 @@ jobs:
     needs: update_package_version
     runs-on: ubuntu-latest
     steps:
-      - name: Create comment body
-        id: comment_body
-        run: |
-          old_version=${{ needs.update_package_version.outputs.old_version_source }}
-          new_version=${{ needs.update_package_version.outputs.new_version_source }}
-
-          echo Warning message: ${{ needs.update_package_version.outputs.warning_message }}
-
-          if ${{ !needs.update_package_version.outputs.warning_message }}; then
-            body="Package version was updated from $old_version to $new_version successfully."
-          else
-            body="${{ needs.update_package_version.outputs.warning_message }}"
-          fi
-
-          echo Comment body: $body
-          echo "::set-output name=body::$(echo $body)"
-
       - uses: actions/github-script@v5
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -234,5 +225,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '${{ steps.comment_body.outputs.body }}'
+              body: '${{ needs.update_package_version.outputs.versions_check_message }}'
             })
