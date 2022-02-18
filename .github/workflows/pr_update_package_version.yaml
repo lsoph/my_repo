@@ -163,7 +163,7 @@ jobs:
             message="Package version was updated from $old_source_version to
               $new_source_version, but package version in target branch is $target_version."
 
-          elif [[ $(echo $new_source_version) == $(echo $old_source_version)]]; then
+          elif [[ $(echo $new_source_version) == $(echo $old_source_version) ]]; then
             result=false
             message="Package version is already ${{ steps.new_source.outputs.package_version }}.
               Nothing to be committed"
@@ -171,7 +171,7 @@ jobs:
 
           echo "::set-output name=result::$result"
           echo "::set-output name=message::$message"
-          echo $warning_message
+          echo $message
 
       - name: Commit & Push changes
         run: |
