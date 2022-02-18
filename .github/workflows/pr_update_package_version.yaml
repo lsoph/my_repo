@@ -147,7 +147,7 @@ jobs:
         id: check_versions
         run: |
           result=true
-          warning_message=""
+          warning_message=false
 
           if [[ ${{ steps.new_source.outputs.package_version }} < ${{ steps.target.outputs.package_version }} ||
               ${{ steps.new_source.outputs.package_version }} == ${{ steps.target.outputs.package_version }} ||
@@ -214,12 +214,10 @@ jobs:
           old_version=${{ needs.update_package_version.outputs.old_version_source }}
           new_version=${{ needs.update_package_version.outputs.new_version_source }}
 
-          if [[ ${{ needs.update_package_version.outputs.warning_message }}!="" ]]; then
+          if ${{ !needs.update_package_version.outputs.warning_message }}; then
             body="Package version was updated from $old_version to $new_version successfully."
-
-          elif [[ ${{ needs.update_package_version.outputs.warning_message }}=="" ]]; then
+          else
             body=${{ needs.update_package_version.outputs.warning_message }}
-
           fi
 
           echo Comment body: $body
