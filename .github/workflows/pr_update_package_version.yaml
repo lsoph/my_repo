@@ -127,8 +127,8 @@ jobs:
         id: old_source
         run: |
           git checkout ${{ needs.resolve_pr_refs.outputs.source_branch }}
-          old_source_version=$(poetry version -s)
-          echo '::set-output name=package_version::$(echo $old_source_version)'
+          old_source_version=$(echo $old_source_version)
+          echo '::set-output name=package_version::$old_source_version'
 
       - name: Update version
         id: new_source
@@ -182,7 +182,7 @@ jobs:
         run: |
           echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
 
-          old_version=$needs.update_package_version.outputs.old_version_source
+          old_version=${{ needs.update_package_version.outputs.old_version_source }}
           new_version=${{ needs.update_package_version.outputs.new_version_source }}
           target_version=${{ needs.update_package_version.outputs.version_target }}
 
