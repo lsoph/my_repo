@@ -119,6 +119,7 @@ jobs:
         run: |
           git checkout ${{ needs.resolve_pr_refs.outputs.target_branch }}
           echo Target branch package version: $target_version
+          echo "::set-output name=package_version::$(echo $(poetry version -s))"
 
       - name: Checkout on source branch
         id: old_source
