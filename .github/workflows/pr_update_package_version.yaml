@@ -8,7 +8,7 @@ jobs:
   resolve_pr_refs:
     name: Resolve PR branches
     if: |
-      ${{ github.event.issue.pull_request }} &&
+      github.event.issue.pull_request &&
       contains(github.event.comment.body, '$ update')
     runs-on: ubuntu-latest
     outputs:
