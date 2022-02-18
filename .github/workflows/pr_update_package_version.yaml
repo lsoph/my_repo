@@ -217,6 +217,9 @@ jobs:
     needs: update_package_version
     runs-on: ubuntu-latest
     steps:
+      - name: Message body
+        run: |
+          echo Message body: ${{ needs.update_package_version.outputs.versions_check_message }}
       - uses: actions/github-script@v5
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
