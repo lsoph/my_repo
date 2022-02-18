@@ -146,7 +146,7 @@ jobs:
       - name: Check versions in target and source branches
         id: check_versions
         env:
-          new_source_version: ${{ steps.new_source.outputs.package_version }}"
+          new_source_version: ${{ steps.new_source.outputs.package_version }}
         run: |
           result=true
           message="no message"
@@ -164,7 +164,7 @@ jobs:
             message="Package version was updated from $old_source_version to
               $new_source_version, but package version in target branch is $target_version."
 
-          elif [[ $(echo $new_source_version) == $(echo $old_source_version) ]]; then
+          elif [[ $new_source_version == $(echo $old_source_version) ]]; then
             result=false
             message="Package version is already ${{ steps.new_source.outputs.package_version }}.
               Nothing to be committed"
