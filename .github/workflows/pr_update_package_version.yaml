@@ -7,7 +7,6 @@ on:
 jobs:
   is_update_requested:
     name: Is version update requested
-    needs: resolve_pr_refs
     if: |
       github.event.issue.pull_request &&
       startsWith(github.event.comment.body, '$ update')
