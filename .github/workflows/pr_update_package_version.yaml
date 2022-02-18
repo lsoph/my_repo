@@ -99,7 +99,6 @@ jobs:
     if: ${{ needs.is_organization_member.outputs.is_member }}
     runs-on: ubuntu-latest
     outputs:
-      version_target: ${{ steps.target.outputs.package_version }}
       old_version_source: ${{ steps.old_source.outputs.package_version }}
       new_version_source: ${{ steps.new_source.outputs.package_version }}
       versions_check: ${{ steps.check_versions.outputs.check_result }}
@@ -119,8 +118,6 @@ jobs:
         id: target
         run: |
           git checkout ${{ needs.resolve_pr_refs.outputs.target_branch }}
-          target_version=$(poetry version -s)
-          echo '::set-output name=package_version::$(echo $target_version)'
           echo Target branch package version: $target_version
 
       - name: Checkout on source branch
@@ -143,7 +140,7 @@ jobs:
             [0-9]\.[0-9]\.[0-9]) poetry version ${{ needs.is_update_requested.outputs.version }};;
           esac
 
-          echo '::set-output name=package_version::$(poetry version -s)'
+          echo "::set-output name=package_version::$(echo $(poetry version -s))"
 
       - name: Check versions in target and source branches
         id: check_versions
@@ -182,9 +179,8 @@ jobs:
         run: |
           echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
 
-          echo Old version: ${{ needs.update_package_version.outputs.old_version_source }}
-          echo New version: ${{ needs.update_package_version.outputs.new_version_source }}
-          echo Target version: ${{ needs.update_package_version.outputs.version_target }}
+          old_version=${{ needs.update_package_version.outputs.old_version_source }}
+          new_version=${{ needs.update_package_version.outputs.new_version_source }}
 
           if [[ ${{ needs.is_organization_member.outputs.is_member }}==true &&
               ${{ needs.update_package_version.outputs.versions_check }}==true ]]; then
