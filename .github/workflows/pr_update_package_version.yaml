@@ -65,8 +65,7 @@ jobs:
   is_organization_member:
     name: Is th2 member
     needs: is_update_requested
-    if: |
-      needs.is_update_requested.outputs.result==true
+    if: ${{ needs.is_update_requested.outputs.result==true }}
     runs-on: ubuntu-latest
     outputs:
       is_member: ${{ steps.membership_check.outputs.result }}
