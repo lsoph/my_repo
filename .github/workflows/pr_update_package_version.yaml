@@ -153,12 +153,13 @@ jobs:
           result=true
           message="no message"
 
-          if [[ ${{ env.new_source_version }} > ${{ env.target_version }} ||
+          if [[ ${{ env.new_source_version }} > ${{ env.target_version }} &&
                 ${{ env.new_source_version }} != ${{ env.old_source_version }} ]]; then
-            message="Package version was updated from $old_version to $new_version successfully."
+            message="Package version was updated from ${{ env.old_source_version }} to
+              ${{ env.new_source_version }} successfully."
 
-          elif [[ ${{ env.new_source_version }} < ${{ env.target_version }} ||
-                  ${{ env.new_source_version }} == ${{ env.target_version }} ||
+          elif [[ ${{ env.new_source_version }} < ${{ env.target_version }} &&
+                  ${{ env.new_source_version }} == ${{ env.target_version }} &&
                   ${{ env.new_source_version }} != ${{ env.old_source_version }} ]]; then
             message="Package version was updated from ${{ env.old_source_version }} to
               ${{ env.new_source_version }}, but package version in target branch is ${{ env.target_version }}."
