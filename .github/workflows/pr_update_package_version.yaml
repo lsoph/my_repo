@@ -166,7 +166,7 @@ jobs:
 
       - name: Commit & Push changes
         run: |
-          if [ ${{ steps.check_versions.outputs.result }}==true ]; then
+          if [[ ${{ steps.check_versions.outputs.result }}==true ]]; then
             git add pyproject.toml
             git commit -m "[TH2-0] Auto commit. Update package version"
             git push
@@ -175,7 +175,7 @@ jobs:
           fi
 
   comment_reply_if_not_member:
-    name: Reply to a user's comment
+    name: Not member comment
     needs: is_organization_member
     if: ${{ !needs.is_organization_member.outputs.is_member }}
     runs-on: ubuntu-latest
@@ -204,7 +204,7 @@ jobs:
             })
 
   comment_reply_if_member:
-    name: Reply to a user's comment
+    name: Update version comment
     needs: update_package_version
     runs-on: ubuntu-latest
     steps:
