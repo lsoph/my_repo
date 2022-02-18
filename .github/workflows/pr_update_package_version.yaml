@@ -29,7 +29,7 @@ jobs:
       - name: Version update requested
         id: is_requested
         run: |
-          result=1
+          result=true
           version=0
 
           shopt -s nocasematch
@@ -40,13 +40,21 @@ jobs:
             "$ update patch") version=patch;;
             \$[[:space:]]update[[:space:]][0-9]\.[0-9]\.[0-9])
               version=$(echo "${{ github.event.comment.body }}" | sed 's/\$[[:space:]]update[[:space:]]//g');;
-            * ) result=0;;
+            * ) result=false;;
+          esac
+
+          case "$ update minor 0.0.1" in
+            "$ update major") echo major;;
+            "$ update minor") echo minor;;
+            "$ update patch") echo patch;;
+            \$[[:space:]]update[[:space:]][0-9]\.[0-9]\.[0-9]) echo numb;;
+            * ) echo WhaT;;
           esac
 
           echo "::set-output name=result::$result"
           echo "::set-output name=version::$(echo $version)"
 
-          if [ $result==1 ]; then
+          if $result; then
             echo Version update was requested
             echo Version: $version
             echo Source branch: ${{ needs.resolve_pr_refs.outputs.source_branch }}
