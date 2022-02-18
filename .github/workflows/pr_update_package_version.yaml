@@ -10,10 +10,7 @@ jobs:
     needs: resolve_pr_refs
     if: |
       github.event.issue.pull_request &&
-      ( ${{ github.event.comment.body == '$ update major' }} ||
-        ${{ github.event.comment.body == '$ update minor' }} ||
-        ${{ github.event.comment.body == '$ update patch' }} ||
-        ${{ github.event.comment.body == \$[[:space:]]update[[:space:]][0-9]\.[0-9]\.[0-9] }} )
+      startsWith(github.event.comment.body, '$ update')
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.is_requested.outputs.result }}
@@ -23,7 +20,6 @@ jobs:
         id: is_requested
         run: |
           result=true
-          version=0
 
           shopt -s nocasematch
 
