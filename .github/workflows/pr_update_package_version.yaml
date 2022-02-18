@@ -150,23 +150,22 @@ jobs:
           old_source_version: ${{ steps.old_source.outputs.package_version }}
           target_version: ${{ steps.target.outputs.package_version }}
         run: |
-          result=true
-          message="no message"
-
           if [[ ${{ env.new_source_version }} > ${{ env.target_version }} &&
                 ${{ env.new_source_version }} != ${{ env.old_source_version }} ]]; then
+            result=true
             message="Package version was updated from ${{ env.old_source_version }} to
               ${{ env.new_source_version }} successfully."
 
-          elif [[ ${{ env.new_source_version }} < ${{ env.target_version }} &&
-                  ${{ env.new_source_version }} == ${{ env.target_version }} &&
+          elif [[ ( ${{ env.new_source_version }} < ${{ env.target_version }} ||
+                    ${{ env.new_source_version }} == ${{ env.target_version }} ) &&
                   ${{ env.new_source_version }} != ${{ env.old_source_version }} ]]; then
+            result=true
             message="Package version was updated from ${{ env.old_source_version }} to
               ${{ env.new_source_version }}, but package version in target branch is ${{ env.target_version }}."
 
           elif [[ ${{ env.new_source_version }} == ${{ env.old_source_version }} ]]; then
             result=false
-            message="Package version is already ${{ env.new_source_version }}. Nothing to be committed"
+            message="Package version is already ${{ env.new_source_version }}. Nothing to be committed."
 
           fi
 
