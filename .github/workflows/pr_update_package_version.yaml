@@ -158,11 +158,11 @@ jobs:
               $new_source_version != "$old_source_version" ]]; then
             message="Package version was updated from $old_version to $new_version successfully."
 
-          elif [[ $new_source_version < $target_version ||
+          elif [[ ${{ env.new_source_version }} < $target_version ||
               $new_source_version == $target_version ||
               $new_source_version != "$old_source_version" ]]; then
             message="Package version was updated from $old_source_version to
-              $new_source_version, but package version in target branch is $target_version."
+              ${{ env.new_source_version }}, but package version in target branch is $target_version."
 
           elif [[ $new_source_version == $(echo $old_source_version) ]]; then
             result=false
