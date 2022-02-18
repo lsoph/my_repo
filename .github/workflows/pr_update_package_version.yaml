@@ -151,11 +151,11 @@ jobs:
 
           if [[ ${{ steps.new_source.outputs.package_version }} < ${{ steps.target.outputs.package_version }} ||
               ${{ steps.new_source.outputs.package_version }} == ${{ steps.target.outputs.package_version }} ||
-              ${{ steps.new_source.outputs.package_version }} != ${{ steps.old_source.outputs.package_version }}]]; then
-            warning_message="Package version was updated from ${{ steps.old_source.outputs.package_version }} to
+              ${{ steps.new_source.outputs.package_version }} != ${{ steps.old_source.outputs.package_version }} ]]
+            then warning_message="Package version was updated from ${{ steps.old_source.outputs.package_version }} to
               ${{ steps.new_source.outputs.package_version }}, but package version in target branch
               is ${{ steps.target.outputs.package_version }}."
-          elif [[ ${{ steps.new_source.outputs.package_version }} == ${{ steps.old_source.outputs.package_version }} ]];
+          elif [[ ${{ steps.new_source.outputs.package_version }} == ${{ steps.old_source.outputs.package_version }} ]]
             then result=false
             warning_message="Package version is already ${{ steps.new_source.outputs.package_version }}.
               Nothing to be committed"
