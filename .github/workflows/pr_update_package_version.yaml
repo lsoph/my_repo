@@ -170,7 +170,7 @@ jobs:
           fi
 
           echo "::set-output name=result::$result"
-          echo "::set-output name=message::$message"
+          echo "::set-output name=message::$(echo $message)"
           echo $message
 
       - name: Commit & Push changes
