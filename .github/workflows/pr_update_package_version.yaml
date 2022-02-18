@@ -5,24 +5,15 @@ on:
     types: [created]
 
 jobs:
-  resolve_pr_refs:
-    name: Resolve PR branches
-    if: |
-      github.event.issue.pull_request &&
-      startsWith(github.event.comment.body, '$ update')
-    runs-on: ubuntu-latest
-    outputs:
-      target_branch: ${{ steps.refs.outputs.base_ref }}
-      source_branch: ${{ steps.refs.outputs.head_ref }}
-    steps:
-      - uses: eficode/resolve-pr-refs@main
-        id: refs
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
   is_update_requested:
     name: Is version update requested
     needs: resolve_pr_refs
+    if: |
+      github.event.issue.pull_request &&
+      ( ${{ github.event.comment.body == '$ update major' }} ||
+        ${{ github.event.comment.body == '$ update minor' }} ||
+        ${{ github.event.comment.body == '$ update patch' }} ||
+        ${{ github.event.comment.body =~ \$[[:space:]]update[[:space:]][0-9]\.[0-9]\.[0-9] }} )
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.is_requested.outputs.result }}
@@ -51,8 +42,6 @@ jobs:
           if $result; then
             echo Version update was requested
             echo Version: $version
-            echo Source branch: ${{ needs.resolve_pr_refs.outputs.source_branch }}
-            echo Target branch: ${{ needs.resolve_pr_refs.outputs.target_branch }}
           else
             echo Version update was not requested
           fi
@@ -61,6 +50,23 @@ jobs:
         run: |
           echo steps.is_requested.outputs.version = ${{ steps.is_requested.outputs.version }}
           echo steps.is_requested.outputs.result = ${{ steps.is_requested.outputs.result }}
+
+  resolve_pr_refs:
+    name: Resolve PR branches
+    runs-on: ubuntu-latest
+    outputs:
+      target_branch: ${{ steps.refs.outputs.base_ref }}
+      source_branch: ${{ steps.refs.outputs.head_ref }}
+    steps:
+      - uses: eficode/resolve-pr-refs@main
+        id: refs
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Branches info
+        run: |
+          echo Source branch: ${{ steps.refs.outputs.head_ref }}
+          echo Target branch: ${{ steps.refs.outputs.base_ref }}
 
   is_organization_member:
     name: Is th2 member
