@@ -171,7 +171,7 @@ jobs:
             git commit -m "[TH2-0] Auto commit. Update package version"
             git push
           else
-            echo Cannot make Commit & Push: ${{ steps.check_versions.outputs.warning_message }}
+            echo Cannot make Commit \& Push: ${{ steps.check_versions.outputs.warning_message }}
           fi
 
   comment_reply_if_not_member:
