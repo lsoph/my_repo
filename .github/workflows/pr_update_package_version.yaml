@@ -101,7 +101,8 @@ jobs:
     outputs:
       old_version_source: ${{ steps.old_source.outputs.package_version }}
       new_version_source: ${{ steps.new_source.outputs.package_version }}
-      versions_check: ${{ steps.check_versions.outputs.check_result }}
+      versions_check_result: ${{ steps.check_versions.outputs.result }}
+      versions_check_warning_message: ${{ steps.check_versions.outputs.warning_message }}
     steps:
       - uses: actions/checkout@v2
 
@@ -125,8 +126,7 @@ jobs:
         id: old_source
         run: |
           git checkout ${{ needs.resolve_pr_refs.outputs.source_branch }}
-          old_source_version=$(echo $(poetry version -s))
-          echo "::set-output name=package_version::$old_source_version"
+          echo "::set-output name=package_version::$(echo $(poetry version -s))"
 
       - name: Update version
         id: new_source
@@ -146,60 +146,82 @@ jobs:
       - name: Check versions in target and source branches
         id: check_versions
         run: |
-          check_result=true
+          result=true
+          warning_message=""
 
           if [[ ${{ steps.new_source.outputs.package_version }} < ${{ steps.target.outputs.package_version }} ||
-              ${{ steps.new_source.outputs.package_version }} == ${{ steps.target.outputs.package_version }} ]]; then
-            check_result="Package version was updated from ${{ steps.old_source.outputs.package_version }} to
+              ${{ steps.new_source.outputs.package_version }} == ${{ steps.target.outputs.package_version }} ||
+              ${{ steps.new_source.outputs.package_version }} != ${{ steps.old_source.outputs.package_version }}]]; then
+            warning_message="Package version was updated from ${{ steps.old_source.outputs.package_version }} to
               ${{ steps.new_source.outputs.package_version }}, but package version in target branch
               is ${{ steps.target.outputs.package_version }}."
           elif [[ ${{ steps.new_source.outputs.package_version }} == ${{ steps.old_source.outputs.package_version }} ]];
-            then check_result="Package version is already ${{ steps.new_source.outputs.package_version }}.
-              Nothing to be comitted"
+            then result=false
+            warning_message="Package version is already ${{ steps.new_source.outputs.package_version }}.
+              Nothing to be committed"
           fi
 
-          echo '::set-output name=check_result::$check_result'
+          echo "::set-output name=result::$result"
+          echo "::set-output name=warning_message::$warning_message"
 
       - name: Commit & Push changes
         run: |
-          if [ ${{ steps.check_versions.outputs.check_result }}==true ]; then
+          if [ ${{ steps.check_versions.outputs.result }}==true ]; then
             git add pyproject.toml
             git commit -m "[TH2-0] Auto commit. Update package version"
             git push
           else
-            echo Cannot make Commit & Push: ${{ steps.check_versions.outputs.check_result }}
+            echo Cannot make Commit & Push: ${{ steps.check_versions.outputs.warning_message }}
           fi
 
-  comment_reply:
+  comment_reply_if_not_member:
     name: Reply to a user's comment
-    needs: [is_organization_member, update_package_version]
+    needs: is_organization_member
     runs-on: ubuntu-latest
     steps:
       - name: Create comment body
         id: comment_body
         run: |
-          echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
-
-          old_version=${{ needs.update_package_version.outputs.old_version_source }}
-          new_version=${{ needs.update_package_version.outputs.new_version_source }}
-
-          if [[ ${{ needs.is_organization_member.outputs.is_member }}==true &&
-              ${{ needs.update_package_version.outputs.versions_check }}==true ]]; then
-            body="Package version was updated from $old_version to $new_version successfully."
-
-          elif [[ ${{ needs.is_organization_member.outputs.is_member }}==true &&
-              ${{ needs.update_package_version.outputs.versions_check }}!=true ]]; then
-            body=${{ needs.update_package_version.outputs.versions_check }}
-
-          elif [[ ${{ needs.is_organization_member.outputs.is_member }}==false ]]; then
-            user=${{ github.event.comment.user.login }}
-            body="You can update the version only if you are th2 member.
-              If you are member, check whether your Organization Visibility set to Public at
-              https://github.com/orgs/th2-net/people?query=$user."
-          fi
+          user=${{ github.event.comment.user.login }}
+          body="You can update the version only if you are th2 member.
+            If you are member, check whether your Organization Visibility set to Public at
+            https://github.com/orgs/th2-net/people?query=$user."
 
           echo Comment body: $body
           echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
+          echo "::set-output name=body::$(echo $body)"
+
+      - uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '${{ steps.comment_body.outputs.body }}'
+            })
+
+  comment_reply_if_member:
+    name: Reply to a user's comment
+    needs: update_package_version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create comment body
+        id: comment_body
+        run: |
+          old_version=${{ needs.update_package_version.outputs.old_version_source }}
+          new_version=${{ needs.update_package_version.outputs.new_version_source }}
+
+          if [[ ${{ needs.update_package_version.outputs.warning_message }}=="" ]]; then
+            body="Package version was updated from $old_version to $new_version successfully."
+
+          elif [[ ${{ needs.update_package_version.outputs.warning_message }}!="" ]]; then
+            body=${{ needs.update_package_version.outputs.warning_message }}
+
+          fi
+
+          echo Comment body: $body
           echo "::set-output name=body::$(echo $body)"
 
       - uses: actions/github-script@v5
