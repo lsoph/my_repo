@@ -45,7 +45,7 @@ jobs:
             * ) result=false;;
           esac
 
-          echo "::set-output name=result::$(echo $result)"
+          echo "::set-output name=result::$result"
           echo "::set-output name=version::$(echo $version)"
 
           if $result; then
