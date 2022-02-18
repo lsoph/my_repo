@@ -7,7 +7,9 @@ on:
 jobs:
   resolve_pr_refs:
     name: Resolve PR branches
-    if: ${{ github.event.issue.pull_request }} && contains(github.event.comment.body, '$ update')
+    if: |
+      ${{ github.event.issue.pull_request }} &&
+      contains(github.event.comment.body, '$ update')
     runs-on: ubuntu-latest
     outputs:
       target_branch: ${{ steps.refs.outputs.base_ref }}
@@ -43,7 +45,7 @@ jobs:
             * ) result=false;;
           esac
 
-          echo "::set-output name=result::$result"
+          echo "::set-output name=result::$(echo $result)"
           echo "::set-output name=version::$(echo $version)"
 
           if $result; then
