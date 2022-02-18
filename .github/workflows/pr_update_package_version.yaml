@@ -102,7 +102,7 @@ jobs:
       old_version_source: ${{ steps.old_source.outputs.package_version }}
       new_version_source: ${{ steps.new_source.outputs.package_version }}
       versions_check_result: ${{ steps.check_versions.outputs.result }}
-      versions_check_message: ${{ steps.check_versions.outputs.warning_message }}
+      versions_check_message: ${{ steps.check_versions.outputs.message }}
     steps:
       - uses: actions/checkout@v2
 
@@ -171,7 +171,7 @@ jobs:
           fi
 
           echo "::set-output name=result::$result"
-          echo '::set-output name=message::$message'
+          echo "::set-output name=message::$message"
           echo $message
 
       - name: Commit & Push changes
@@ -181,7 +181,7 @@ jobs:
             git commit -m "[TH2-0] Auto commit. Update package version"
             git push
           else
-            echo Cannot make Commit \& Push: ${{ steps.check_versions.outputs.warning_message }}
+            echo Cannot make Commit \& Push: ${{ steps.check_versions.outputs.message }}
           fi
 
   comment_reply_if_not_member:
