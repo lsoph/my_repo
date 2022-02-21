@@ -68,8 +68,6 @@ jobs:
 
   is_organization_member:
     name: Is th2 member
-#    needs: is_update_requested
-#    if: ${{ needs.is_update_requested.outputs.result == 'true' }}
     if: |
       github.event.issue.pull_request &&
       startsWith(github.event.comment.body, '$ update ')
@@ -84,6 +82,7 @@ jobs:
           organization: th2-net
           username: ${{ github.event.issue.user.login }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Is member?
         run: |
           echo Is update requested: ${{ needs.is_update_requested.outputs.result }}
@@ -169,7 +168,7 @@ jobs:
             message="Package version was updated from ${{ env.old_source_version }} to ${{ env.new_source_version }}
                 successfully."
 
-          elif [[ ${{ env.new_source_version }} <= ${{ env.target_version }} &&
+          elif [[ ${{ env.new_source_version }} -le ${{ env.target_version }} &&
                   ${{ env.new_source_version }} != ${{ env.old_source_version }} ]]; then
             result=true
             message="Package version was updated from ${{ env.old_source_version }}
@@ -197,8 +196,10 @@ jobs:
 
   comment_reply_if_not_member:
     name: -Not member- comment
-    needs: is_organization_member
-    if: ${{ !needs.is_organization_member.outputs.is_member }}
+    needs: [ is_organization_member, is_update_requested ]
+    if: |
+      ${{ !needs.is_organization_member.outputs.is_member }} &&
+      ${{ needs.is_update_requested.outputs.result == 'false' }}
     runs-on: ubuntu-latest
     steps:
       - name: Create comment body
