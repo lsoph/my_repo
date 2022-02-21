@@ -107,8 +107,8 @@ jobs:
     name: Update package version
     needs: [resolve_pr_refs, is_update_requested, is_organization_member]
     if: |
-      ${{ needs.is_organization_member.outputs.is_member }} &&
-      ${{ needs.is_update_requested.outputs.result == 'true' }}
+      needs.is_organization_member.outputs.is_member &&
+      needs.is_update_requested.outputs.result
     runs-on: ubuntu-latest
     outputs:
       old_version_source: ${{ steps.old_source.outputs.package_version }}
@@ -199,7 +199,7 @@ jobs:
     needs: [ is_organization_member, is_update_requested ]
     if: |
       !needs.is_organization_member.outputs.is_member &&
-      needs.is_update_requested.outputs.result == 'false'
+      !needs.is_update_requested.outputs.result
     runs-on: ubuntu-latest
     steps:
       - name: view output
