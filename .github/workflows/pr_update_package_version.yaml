@@ -113,6 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       requested_version: ${{ steps.new_source.outputs.requested_version }}
+      old_version_source: ${{ steps.old_source.outputs.package_version }}
       new_version_source: ${{ steps.new_source.outputs.package_version }}
       versions_check_result: ${{ steps.check_versions.outputs.result }}
       versions_check_message: ${{ steps.check_versions.outputs.message }}
@@ -136,8 +137,10 @@ jobs:
           echo "::set-output name=package_version::$(echo $(poetry version -s))"
 
       - name: Checkout on source branch
+        id: old_source
         run: |
           git checkout ${{ needs.resolve_pr_refs.outputs.source_branch }}
+          echo "::set-output name=package_version::$(echo $(poetry version -s))"
 
       - name: Update version
         id: new_source
