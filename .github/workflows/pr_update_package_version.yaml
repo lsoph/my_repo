@@ -198,14 +198,14 @@ jobs:
     name: -Not member- comment
     needs: [ is_organization_member, is_update_requested ]
     if: |
-      ${{ !needs.is_organization_member.outputs.is_member &&
-          needs.is_update_requested.outputs.result == 'false' }}
+      !needs.is_organization_member.outputs.is_member &&
+      needs.is_update_requested.outputs.result == 'false'
     runs-on: ubuntu-latest
     steps:
       - name: view output
         run: |
-          echo Is member: needs.is_organization_member.outputs.is_member
-          echo Is update requested: needs.is_update_requested.outputs.result
+          echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
+          echo Is update requested: ${{ needs.is_update_requested.outputs.result }}
 
       - name: Create comment body
         id: comment_body
