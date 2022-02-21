@@ -65,7 +65,7 @@ jobs:
 
           echo "::set-output name=body::$body"
 
-      - name: Make a comment
+      - name: -Not member- comment
         if: steps.comment_body.outcome == 'success'
         uses: actions/github-script@v5
         with:
