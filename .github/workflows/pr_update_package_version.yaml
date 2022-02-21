@@ -23,10 +23,10 @@ jobs:
           shopt -s nocasematch
 
           case "${{ github.event.comment.body }}" in
-            "$ update major") version=major;;
-            "$ update minor") version=minor;;
-            "$ update patch") version=patch;;
-            ^\$[[:space:]]update[[:space:]]+([0-9])\.+([0-9])\.+([0-9]))
+            "$ update major" ) version=major;;
+            "$ update minor" ) version=minor;;
+            "$ update patch" ) version=patch;;
+            \$[[:space:]]update[[:space:]]+([0-9])\.+([0-9])\.+([0-9]) )
               version=$(echo "${{ github.event.comment.body }}" | sed 's/\$[[:space:]]update[[:space:]]//g');;
             * ) result=false;;
           esac
@@ -145,10 +145,10 @@ jobs:
           echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
           echo Version: ${{ needs.is_update_requested.outputs.version }}
           case '${{ needs.is_update_requested.outputs.version }}' in
-            "major") poetry version major;;
-            "minor") poetry version minor;;
-            "patch") poetry version patch;;
-            +([0-9])\.+([0-9])\.+([0-9])) poetry version ${{ needs.is_update_requested.outputs.version }} &&
+            "major" ) poetry version major;;
+            "minor" ) poetry version minor;;
+            "patch" ) poetry version patch;;
+            +([0-9])\.+([0-9])\.+([0-9]) ) poetry version ${{ needs.is_update_requested.outputs.version }} &&
               echo "::set-output name=requested_version::${{ needs.is_update_requested.outputs.version }}";;
           esac
 
