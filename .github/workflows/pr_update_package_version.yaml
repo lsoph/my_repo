@@ -189,7 +189,7 @@ jobs:
     needs: [ is_organization_member, is_update_requested ]
     if: |
       needs.is_organization_member.outputs.is_member=='false' &&
-      needs.is_update_requested.outputs.result=='false'
+      needs.is_update_requested.outputs.result=='true'
     runs-on: ubuntu-latest
     steps:
       - name: Create comment body
