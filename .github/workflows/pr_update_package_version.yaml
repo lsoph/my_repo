@@ -61,7 +61,7 @@ jobs:
           user=${{ github.event.comment.user.login }}
           body="Either ${user} is not part of the th2-net organization or ${user} has its Organization
           Visibility set to Private at https://github.com/orgs/th2-net/people?query=${user}.
-          Ensure you change your Organization Visibility to Public and trigger the test again."
+          Ensure you change Organization Visibility to Public and trigger the test again."
 
           echo "::set-output name=body::$(echo $body)"
 
