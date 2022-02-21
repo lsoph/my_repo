@@ -9,10 +9,7 @@ jobs:
     name: Is version update requested
     if: |
       github.event.issue.pull_request &&
-      (( github.event.comment.body == '$ update major' ||
-         github.event.comment.body == '$ update minor' ||
-         github.event.comment.body == '$ update patch' ||
-         github.event.comment.body =~ \$[[:space:]]update[[:space:]][0-9]\.[0-9]\.[0-9] ))
+      startsWith(github.event.comment.body, '$ update ')
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.is_requested.outputs.result }}
@@ -51,6 +48,9 @@ jobs:
 
   resolve_pr_refs:
     name: Resolve PR branches
+    if: |
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '$ update ')
     runs-on: ubuntu-latest
     outputs:
       target_branch: ${{ steps.refs.outputs.base_ref }}
@@ -68,8 +68,11 @@ jobs:
 
   is_organization_member:
     name: Is th2 member
-    needs: is_update_requested
-    if: ${{ needs.is_update_requested.outputs.result == 'true' }}
+#    needs: is_update_requested
+#    if: ${{ needs.is_update_requested.outputs.result == 'true' }}
+    if: |
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '$ update ')
     runs-on: ubuntu-latest
     outputs:
       is_member: ${{ steps.membership_check.outputs.result }}
