@@ -112,7 +112,6 @@ jobs:
       needs.is_update_requested.outputs.result
     runs-on: ubuntu-latest
     outputs:
-      requested_version: ${{ steps.new_source.outputs.requested_version }}
       old_version_source: ${{ steps.old_source.outputs.package_version }}
       new_version_source: ${{ steps.new_source.outputs.package_version }}
       versions_check_result: ${{ steps.check_versions.outputs.result }}
@@ -154,8 +153,7 @@ jobs:
             "major" ) poetry version major;;
             "minor" ) poetry version minor;;
             "patch" ) poetry version patch;;
-            +([0-9])\.+([0-9])\.+([0-9]) ) poetry version ${{ needs.is_update_requested.outputs.version }} &&
-              echo "::set-output name=requested_version::${{ needs.is_update_requested.outputs.version }}";;
+            +([0-9])\.+([0-9])\.+([0-9]) ) poetry version ${{ needs.is_update_requested.outputs.version }};;
           esac
 
           echo "::set-output name=package_version::$(echo $(poetry version -s))"
@@ -179,7 +177,7 @@ jobs:
             message="Package version was updated from ${{ env.old_source_version }}
               to ${{ env.new_source_version }}, but package version in target branch is ${{ env.target_version }}."
 
-          elif [[ ${{ env.new_source_version }} == ${{ env.requested_version }} ]]; then
+          elif [[ ${{ env.new_source_version }} == ${{ env.old_source_version }} ]]; then
             result=false
             message="Package version is already ${{ env.new_source_version }}. Nothing to be committed."
 
