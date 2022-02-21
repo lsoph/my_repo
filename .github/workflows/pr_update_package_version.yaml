@@ -18,34 +18,26 @@ jobs:
       - name: Version update requested
         id: is_requested
         run: |
-          result=true
-
           shopt -s extglob
           shopt -s nocasematch
 
           case "${{ github.event.comment.body }}" in
-            "$ update major" ) version=major;;
-            "$ update minor" ) version=minor;;
-            "$ update patch" ) version=patch;;
+            "$ update major" ) result=true && version=major;;
+            "$ update minor" ) result=true && version=minor;;
+            "$ update patch" ) result=true && version=patch;;
             \$[[:space:]]update[[:space:]]+([0-9])\.+([0-9])\.+([0-9]) )
+              result=true &&
               version=$(echo "${{ github.event.comment.body }}" | sed 's/\$[[:space:]]update[[:space:]]//g');;
-            * ) result=false;;
+            * ) result=false version=none;;
           esac
 
           echo "::set-output name=result::$result"
           echo "::set-output name=version::$(echo $version)"
 
-          if $result; then
-            echo Version update was requested
-            echo Version: $version
-          else
-            echo Version update was not requested
-          fi
-
-      - name: view output
+      - name: Output
         run: |
-          echo steps.is_requested.outputs.version = ${{ steps.is_requested.outputs.version }}
-          echo steps.is_requested.outputs.result = ${{ steps.is_requested.outputs.result }}
+          echo Was update requested: ${{ steps.is_requested.outputs.result }}
+          echo Version to update: ${{ steps.is_requested.outputs.version }}
 
   resolve_pr_refs:
     name: Resolve PR branches
@@ -62,7 +54,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Branches info
+      - name: Output
         run: |
           echo Source branch: ${{ steps.refs.outputs.head_ref }}
           echo Target branch: ${{ steps.refs.outputs.base_ref }}
@@ -84,25 +76,11 @@ jobs:
           username: ${{ github.event.issue.user.login }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Is member?
+      - name: Output
         run: |
-          echo Is update requested: ${{ needs.is_update_requested.outputs.result }}
-
+          user=${{ github.event.comment.user.login }}
           result=${{ steps.membership_check.outputs.result }}
-          if [ $result == false ]; then
-            user=${{ github.event.comment.user.login }}
-            echo Either ${user} is not part of the th2-net organization
-            echo or ${user} has its Organization Visibility set to Private at
-            echo https://github.com/orgs/th2-net/people?query=${user}
-            echo
-            echo Ensure you change your Organization Visibility to Public and
-            echo trigger the test again.
-            exit 1
-          elif [ $result == true ]; then
-            user=${{ github.event.comment.user.login }}
-            echo '::set-output name=user_login::$user'
-            echo ${user} is part of the th2-net organization
-          fi
+          echo Is $user th2 member: $result
 
   update_package_version:
     name: Update package version
@@ -112,9 +90,6 @@ jobs:
       needs.is_update_requested.outputs.result
     runs-on: ubuntu-latest
     outputs:
-      old_version_source: ${{ steps.old_source.outputs.package_version }}
-      new_version_source: ${{ steps.new_source.outputs.package_version }}
-      versions_check_result: ${{ steps.check_versions.outputs.result }}
       versions_check_message: ${{ steps.check_versions.outputs.message }}
     steps:
       - uses: actions/checkout@v2
@@ -189,7 +164,6 @@ jobs:
 
           echo "::set-output name=result::$result"
           echo "::set-output name=message::$(echo $message)"
-          echo $message
 
       - name: Commit & Push changes
         run: |
@@ -197,9 +171,16 @@ jobs:
             git add pyproject.toml
             git commit -m "[TH2-0] Auto commit. Update package version"
             git push
+
+      - name: Output
+        run: |
+          echo Old source version: ${{ steps.old_source.outputs.package_version }}
+          echo New source version: ${{ steps.new_source.outputs.package_version }}
+          if ${{ steps.check_versions.outputs.result }}; then
+            echo Version update can be committed and pushed.
           else
-            echo Cannot make Commit \& Push: ${{ steps.check_versions.outputs.message }}
-          fi
+            echo Cannot make commit and push.
+          echo Message: ${{ steps.check_versions.outputs.message }}
 
   comment_reply_if_not_member:
     name: -Not member- comment
@@ -209,21 +190,14 @@ jobs:
       !needs.is_update_requested.outputs.result
     runs-on: ubuntu-latest
     steps:
-      - name: view output
-        run: |
-          echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
-          echo Is update requested: ${{ needs.is_update_requested.outputs.result }}
-
       - name: Create comment body
         id: comment_body
         run: |
           user=${{ github.event.comment.user.login }}
-          body="You can update the version only if you are th2 member.
-            If you are member, check whether your Organization Visibility set to Public at
-            https://github.com/orgs/th2-net/people?query=$user."
+          body="Either ${user} is not part of the th2-net organization or ${user} has its Organization
+            Visibility set to Private at https://github.com/orgs/th2-net/people?query=${user}.
+            Ensure you change your Organization Visibility to Public and trigger the test again."
 
-          echo Comment body: $body
-          echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
           echo "::set-output name=body::$(echo $body)"
 
       - uses: actions/github-script@v5
@@ -242,9 +216,6 @@ jobs:
     needs: update_package_version
     runs-on: ubuntu-latest
     steps:
-      - name: Message body
-        run: |
-          echo Message body: ${{ needs.update_package_version.outputs.versions_check_message }}
       - uses: actions/github-script@v5
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
