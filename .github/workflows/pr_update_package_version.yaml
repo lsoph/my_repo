@@ -27,7 +27,7 @@ jobs:
             "$ update patch" ) result=true && version=patch;;
             \$[[:space:]]update[[:space:]]+([0-9])\.+([0-9])\.+([0-9]) )
               result=true &&
-              version=$(echo "${{ github.event.comment.body }}" | sed 's/\$[[:space:]]update[[:space:]]//g');;
+              version=$(echo "${{ github.event.comment.body }}" | sed 's/\$[[:space:]]update[[:space:]]//gI');;
             * ) result=false version=none;;
           esac
 
