@@ -9,10 +9,10 @@ jobs:
     name: Is version update requested
     if: |
       github.event.issue.pull_request &&
-      [[ github.event.comment.body == '$ update major' ||
+      (( github.event.comment.body == '$ update major' ||
          github.event.comment.body == '$ update minor' }} ||
          github.event.comment.body == '$ update patch' }} ||
-         github.event.comment.body =~ \$[[:space:]]update[[:space:]][0-9]\.[0-9]\.[0-9] ]]
+         github.event.comment.body =~ \$[[:space:]]update[[:space:]][0-9]\.[0-9]\.[0-9] ))
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.is_requested.outputs.result }}
