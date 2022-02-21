@@ -26,7 +26,7 @@ jobs:
             "$ update major") version=major;;
             "$ update minor") version=minor;;
             "$ update patch") version=patch;;
-            \$[[:space:]]update[[:space:]][0-9]+\.[0-9]+\.[0-9]+)
+            ^\$[[:space:]]update[[:space:]][0-9]+\.[0-9]+\.[0-9]+$)
               version=$(echo "${{ github.event.comment.body }}" | sed 's/\$[[:space:]]update[[:space:]]//g');;
             * ) result=false;;
           esac
@@ -150,7 +150,7 @@ jobs:
             "major") poetry version major;;
             "minor") poetry version minor;;
             "patch") poetry version patch;;
-            [0-9]+\.[0-9]+\.[0-9]+) poetry version ${{ needs.is_update_requested.outputs.version }};;
+            ^[0-9]+\.[0-9]+\.[0-9]+$) poetry version ${{ needs.is_update_requested.outputs.version }};;
           esac
 
           echo "::set-output name=package_version::$(echo $(poetry version -s))"
@@ -177,6 +177,10 @@ jobs:
           elif [[ ${{ env.new_source_version }} == ${{ env.old_source_version }} ]]; then
             result=false
             message="Package version is already ${{ env.new_source_version }}. Nothing to be committed."
+
+          else
+            result=false
+            message="Cannot update package version."
 
           fi
 
