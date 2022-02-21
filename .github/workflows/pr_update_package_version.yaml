@@ -172,13 +172,16 @@ jobs:
           echo Source branch: ${{ steps.refs.outputs.head_ref }}
           echo Source branch old version: ${{ steps.old_source.outputs.package_version }}
           echo Source branch new version: ${{ steps.new_source.outputs.package_version }}
+
           echo Target branch: ${{ steps.refs.outputs.base_ref }}
           echo Target branch version: ${{ steps.target.outputs.package_version }}
+
           if ${{ steps.check_versions.outputs.result }}; then
             echo Version update can be committed and pushed.
           else
             echo Cannot make commit and push.
           fi
+
           echo Message: ${{ steps.check_versions.outputs.message }}
 
   comment_reply_if_not_member:
