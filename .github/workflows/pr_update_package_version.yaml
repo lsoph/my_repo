@@ -22,17 +22,17 @@ jobs:
           shopt -s nocasematch
 
           case "${{ github.event.comment.body }}" in
-            "$ update major" ) result=true && version=major;;
-            "$ update minor" ) result=true && version=minor;;
-            "$ update patch" ) result=true && version=patch;;
+            "$ update major" ) result=true version=major;;
+            "$ update minor" ) result=true version=minor;;
+            "$ update patch" ) result=true version=patch;;
             \$[[:space:]]update[[:space:]]+([0-9])\.+([0-9])\.+([0-9]) )
-              result=true &&
+              result=true
               version=$(echo "${{ github.event.comment.body }}" | sed 's/\$[[:space:]]update[[:space:]]//gI');;
             * ) result=false version=none;;
           esac
 
           echo "::set-output name=result::$result"
-          echo "::set-output name=version::$(echo $version)"
+          echo "::set-output name=version::$version"
 
       - name: Output
         run: |
