@@ -86,8 +86,8 @@ jobs:
     name: Update package version
     needs: [resolve_pr_refs, is_update_requested, is_organization_member]
     if: |
-      needs.is_organization_member.outputs.is_member==true &&
-      needs.is_update_requested.outputs.result==true
+      needs.is_organization_member.outputs.is_member=='true' &&
+      needs.is_update_requested.outputs.result=='true'
     runs-on: ubuntu-latest
     outputs:
       versions_check_message: ${{ steps.check_versions.outputs.message }}
