@@ -170,12 +170,11 @@ jobs:
           echo "::set-output name=message::$(echo $message)"
 
       - name: Commit & Push changes
+        if: steps.check_versions.outputs.result=='true'
         run: |
-          if ${{ steps.check_versions.outputs.result }}; then
-            git add pyproject.toml
-            git commit -m "[TH2-0] Auto commit. Update package version"
-            git push
-          fi
+          git add pyproject.toml
+          git commit -m "[TH2-0] Auto commit. Update package version"
+          git push
 
       - name: -Update version- comment
         uses: actions/github-script@v5
