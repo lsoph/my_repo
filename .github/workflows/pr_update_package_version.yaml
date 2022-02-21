@@ -26,7 +26,7 @@ jobs:
             "$ update major") version=major;;
             "$ update minor") version=minor;;
             "$ update patch") version=patch;;
-            \$[[:space:]]update[[:space:]][0-9]\.[0-9]\.[0-9])
+            \$[[:space:]]update[[:space:]][0-9]+\.[0-9]+\.[0-9]+)
               version=$(echo "${{ github.event.comment.body }}" | sed 's/\$[[:space:]]update[[:space:]]//g');;
             * ) result=false;;
           esac
@@ -107,7 +107,9 @@ jobs:
   update_package_version:
     name: Update package version
     needs: [resolve_pr_refs, is_update_requested, is_organization_member]
-    if: ${{ needs.is_organization_member.outputs.is_member }}
+    if: |
+      ${{ needs.is_organization_member.outputs.is_member }} &&
+      ${{ needs.is_update_requested.outputs.result == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       old_version_source: ${{ steps.old_source.outputs.package_version }}
@@ -149,7 +151,7 @@ jobs:
             "major") poetry version major;;
             "minor") poetry version minor;;
             "patch") poetry version patch;;
-            [0-9]\.[0-9]\.[0-9]) poetry version ${{ needs.is_update_requested.outputs.version }};;
+            [0-9]+\.[0-9]+\.[0-9]+) poetry version ${{ needs.is_update_requested.outputs.version }};;
           esac
 
           echo "::set-output name=package_version::$(echo $(poetry version -s))"
@@ -167,8 +169,7 @@ jobs:
             message="Package version was updated from ${{ env.old_source_version }} to ${{ env.new_source_version }}
                 successfully."
 
-          elif [[ ( ${{ env.new_source_version }} < ${{ env.target_version }} ||
-                    ${{ env.new_source_version }} == ${{ env.target_version }} ) &&
+          elif [[ ${{ env.new_source_version }} <= ${{ env.target_version }} &&
                   ${{ env.new_source_version }} != ${{ env.old_source_version }} ]]; then
             result=true
             message="Package version was updated from ${{ env.old_source_version }}
