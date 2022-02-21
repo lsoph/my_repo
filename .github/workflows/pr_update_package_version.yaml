@@ -188,8 +188,8 @@ jobs:
     name: -Not member- comment
     needs: [ is_organization_member, is_update_requested ]
     if: |
-      !needs.is_organization_member.outputs.is_member &&
-      !needs.is_update_requested.outputs.result
+      needs.is_organization_member.outputs.is_member=='false' &&
+      needs.is_update_requested.outputs.result=='false'
     runs-on: ubuntu-latest
     steps:
       - name: Create comment body
