@@ -175,8 +175,9 @@ jobs:
 
       - name: Output
         run: |
-          echo Old source version: ${{ steps.old_source.outputs.package_version }}
-          echo New source version: ${{ steps.new_source.outputs.package_version }}
+          echo Source branch old version: ${{ steps.old_source.outputs.package_version }}
+          echo Source branch new version: ${{ steps.new_source.outputs.package_version }}
+          echo Target branch version: ${{ steps.target.outputs.package_version }}
           if ${{ steps.check_versions.outputs.result }}; then
             echo Version update can be committed and pushed.
           else
