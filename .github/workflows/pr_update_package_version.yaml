@@ -89,8 +89,6 @@ jobs:
       needs.is_organization_member.outputs.is_member=='true' &&
       needs.is_update_requested.outputs.result=='true'
     runs-on: ubuntu-latest
-    outputs:
-      versions_check_message: ${{ steps.check_versions.outputs.message }}
     steps:
       - uses: actions/checkout@v2
 
@@ -172,6 +170,18 @@ jobs:
             git push
           fi
 
+      - name: -Update version- comment
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '${{ steps.check_versions.outputs.message }}'
+            })
+
       - name: Output
         run: |
           echo Source branch old version: ${{ steps.old_source.outputs.package_version }}
@@ -211,20 +221,4 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: '${{ steps.comment_body.outputs.body }}'
-            })
-
-  comment_reply_if_member:
-    name: -Update version- comment
-    needs: update_package_version
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v5
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '${{ needs.update_package_version.outputs.versions_check_message }}'
             })
