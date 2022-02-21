@@ -63,7 +63,7 @@ jobs:
           Visibility set to Private at https://github.com/orgs/th2-net/people?query=${user}.
           Ensure you change your Organization Visibility to Public and trigger the test again."
 
-          echo "::set-output name=body::$body"
+          echo "::set-output name=body::$(echo $body)"
 
       - name: -Not member- comment
         if: steps.comment_body.outcome == 'success'
