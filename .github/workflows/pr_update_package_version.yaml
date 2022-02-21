@@ -41,9 +41,7 @@ jobs:
 
   is_organization_member:
     name: Is th2 member
-    if: |
-      github.event.issue.pull_request &&
-      startsWith(github.event.comment.body, '$ update ')
+    needs: is_update_requested
     runs-on: ubuntu-latest
     outputs:
       is_member: ${{ steps.membership_check.outputs.result }}
@@ -55,6 +53,30 @@ jobs:
           organization: th2-net
           username: ${{ github.event.issue.user.login }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create -not member- comment body
+        id: comment_body
+        if: steps.membership_check.outputs.result=='true'
+        run: |
+          user=${{ github.event.comment.user.login }}
+          body="Either ${user} is not part of the th2-net organization or ${user} has its Organization
+          Visibility set to Private at https://github.com/orgs/th2-net/people?query=${user}.
+          Ensure you change your Organization Visibility to Public and trigger the test again."
+
+          echo "::set-output name=body::$body"
+
+      - name: Make a comment
+        if: steps.comment_body.outcome == 'success'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '${{ steps.comment_body.outputs.body }}'
+            })
 
       - name: Output
         run: |
@@ -183,32 +205,3 @@ jobs:
           fi
 
           echo Message: ${{ steps.check_versions.outputs.message }}
-
-  comment_reply_if_not_member:
-    name: -Not member- comment
-    needs: [ is_organization_member, is_update_requested ]
-    if: |
-      needs.is_organization_member.outputs.is_member=='false' &&
-      needs.is_update_requested.outputs.result=='true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create comment body
-        id: comment_body
-        run: |
-          user=${{ github.event.comment.user.login }}
-          body="Either ${user} is not part of the th2-net organization or ${user} has its Organization
-            Visibility set to Private at https://github.com/orgs/th2-net/people?query=${user}.
-            Ensure you change your Organization Visibility to Public and trigger the test again."
-
-          echo "::set-output name=body::$body"
-
-      - uses: actions/github-script@v5
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '${{ steps.comment_body.outputs.body }}'
-            })
