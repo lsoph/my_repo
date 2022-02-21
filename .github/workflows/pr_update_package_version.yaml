@@ -86,8 +86,8 @@ jobs:
     name: Update package version
     needs: [resolve_pr_refs, is_update_requested, is_organization_member]
     if: |
-      needs.is_organization_member.outputs.is_member &&
-      needs.is_update_requested.outputs.result
+      needs.is_organization_member.outputs.is_member==true &&
+      needs.is_update_requested.outputs.result==true
     runs-on: ubuntu-latest
     outputs:
       versions_check_message: ${{ steps.check_versions.outputs.message }}
@@ -122,8 +122,6 @@ jobs:
           shopt -s extglob
           shopt -s nocasematch
 
-          echo Is member: ${{ needs.is_organization_member.outputs.is_member }}
-          echo Version: ${{ needs.is_update_requested.outputs.version }}
           case '${{ needs.is_update_requested.outputs.version }}' in
             "major" ) poetry version major;;
             "minor" ) poetry version minor;;
