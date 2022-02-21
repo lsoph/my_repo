@@ -56,7 +56,7 @@ jobs:
 
       - name: Create -not member- comment body
         id: comment_body
-        if: steps.membership_check.outputs.result=='true'
+        if: steps.membership_check.outputs.result=='false'
         run: |
           user=${{ github.event.comment.user.login }}
           body="Either ${user} is not part of the th2-net organization or ${user} has its Organization
