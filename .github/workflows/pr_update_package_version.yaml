@@ -56,12 +56,12 @@ jobs:
 
       - name: Create -not member- comment body
         id: comment_body
-        if: steps.membership_check.outputs.result=='false'
+        if: steps.membership_check.outputs.result == 'false'
         run: |
           user=${{ github.event.comment.user.login }}
           body="Either ${user} is not part of the th2-net organization or ${user} has its Organization
-          Visibility set to Private at https://github.com/orgs/th2-net/people?query=${user}.
-          Ensure you change Organization Visibility to Public and trigger the test again."
+            Visibility set to Private at https://github.com/orgs/th2-net/people?query=${user}.
+            Ensure you change Organization Visibility to Public and trigger the test again."
 
           echo "::set-output name=body::$(echo $body)"
 
@@ -88,8 +88,8 @@ jobs:
     name: Update package version
     needs: [is_update_requested, is_organization_member]
     if: |
-      needs.is_organization_member.outputs.is_member=='true' &&
-      needs.is_update_requested.outputs.result=='true'
+      needs.is_organization_member.outputs.is_member == 'true' &&
+      needs.is_update_requested.outputs.result == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -112,7 +112,6 @@ jobs:
         id: target
         run: |
           git checkout ${{ steps.refs.outputs.base_ref }}
-          echo Target branch package version: $target_version
           echo "::set-output name=package_version::$(poetry version -s)"
 
       - name: Checkout on source branch
@@ -170,7 +169,7 @@ jobs:
           echo "::set-output name=message::$(echo $message)"
 
       - name: Commit & Push changes
-        if: steps.check_versions.outputs.result=='true'
+        if: steps.check_versions.outputs.result == 'true'
         run: |
           git add pyproject.toml
           git commit -m "[TH2-0] Auto commit. Update package version"
